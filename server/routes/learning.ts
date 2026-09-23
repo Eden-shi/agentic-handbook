@@ -95,7 +95,7 @@ router.get('/notes', authMiddleware, async (req: AuthRequest, res: Response) => 
 // 笔记详情
 router.get('/notes/:id', authMiddleware, async (req: AuthRequest, res: Response) => {
   const [note] = await db.select().from(learningNotes)
-    .where(and(eq(learningNotes.id, req.params.id), eq(learningNotes.userId, req.userId!)))
+    .where(and(eq(learningNotes.id, req.params.id as any), eq(learningNotes.userId, req.userId!)))
     .limit(1);
   if (!note) return res.status(404).json({ error: '笔记不存在' });
   res.json(note);
@@ -116,7 +116,7 @@ router.put('/notes/:id', authMiddleware, async (req: AuthRequest, res: Response)
   const { title, content, relatedType, relatedId, relatedTitle } = req.body;
   const [note] = await db.update(learningNotes)
     .set({ title, content, relatedType, relatedId, relatedTitle, updatedAt: new Date() })
-    .where(and(eq(learningNotes.id, req.params.id), eq(learningNotes.userId, req.userId!)))
+    .where(and(eq(learningNotes.id, req.params.id as any), eq(learningNotes.userId, req.userId!)))
     .returning();
   if (!note) return res.status(404).json({ error: '笔记不存在' });
   res.json(note);
@@ -125,7 +125,7 @@ router.put('/notes/:id', authMiddleware, async (req: AuthRequest, res: Response)
 // 删除笔记
 router.delete('/notes/:id', authMiddleware, async (req: AuthRequest, res: Response) => {
   await db.delete(learningNotes)
-    .where(and(eq(learningNotes.id, req.params.id), eq(learningNotes.userId, req.userId!)));
+    .where(and(eq(learningNotes.id, req.params.id as any), eq(learningNotes.userId, req.userId!)));
   res.json({ success: true });
 });
 

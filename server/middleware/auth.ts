@@ -10,7 +10,7 @@ export interface AuthRequest extends Request {
 }
 
 export function generateToken(userId: string, email: string, username: string): string {
-  return jwt.sign({ userId, email, username }, JWT_SECRET, { expiresIn: process.env.JWT_EXPIRES_IN || '7d' });
+  return jwt.sign({ userId, email, username }, JWT_SECRET, { expiresIn: (process.env.JWT_EXPIRES_IN || '7d') as any });
 }
 
 export function authMiddleware(req: AuthRequest, res: Response, next: NextFunction) {

@@ -217,7 +217,7 @@ messages = [
 
 ## 三、结构化输出
 
-> **注意**：不是所有模型都支持`response_format`参数。OpenAI和DeepSeek较新的模型支持，其他平台请查官方文档确认。如果不支持，就在提示词里明确要求"请只输出JSON，不要有其他文字"。
+> **注意**：不是所有模型都支持\`response_format\`参数。OpenAI和DeepSeek较新的模型支持，其他平台请查官方文档确认。如果不支持，就在提示词里明确要求"请只输出JSON，不要有其他文字"。
 
 现在主流模型都支持直接输出JSON：
 
@@ -581,7 +581,7 @@ MCP是Anthropic在2024年底推出的开放标准，2026年已经是事实标准
 
 ## 二、写一个最简单的MCP Server
 
-> **注意**：下面是代码结构示意。实际运行需要先`pip install mcp`，并参考MCP官方文档配置传输方式（stdio或HTTP）。
+> **注意**：下面是代码结构示意。实际运行需要先\`pip install mcp\`，并参考MCP官方文档配置传输方式（stdio或HTTP）。
 
 用FastMCP（MCP官方Python SDK）：
 

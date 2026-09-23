@@ -15,6 +15,7 @@ import ProjectDetail from './pages/ProjectDetail';
 import Admin from './pages/admin/Admin';
 import AdminUsers from './pages/admin/AdminUsers';
 import AdminContent from './pages/admin/AdminContent';
+import AdminUserDetail from './pages/admin/AdminUserDetail';
 
 export default function App() {
   return (
@@ -33,6 +34,7 @@ export default function App() {
         <Route path="about" element={<About />} />
         <Route path="admin" element={<Admin />} />
         <Route path="admin/users" element={<AdminUsers />} />
+        <Route path="admin/users/:id" element={<AdminUserDetail />} />
         <Route path="admin/content" element={<AdminContent />} />
       </Route>
       <Route path="*" element={<Navigate to="/" replace />} />

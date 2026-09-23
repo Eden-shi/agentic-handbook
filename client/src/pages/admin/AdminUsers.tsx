@@ -1,7 +1,9 @@
 import { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import api from '../../lib/api';
 
 export default function AdminUsers() {
+  const nav = useNavigate();
   const [users, setUsers] = useState<any[]>([]);
   const [search, setSearch] = useState('');
 
@@ -68,24 +70,27 @@ export default function AdminUsers() {
               <span style={{ marginLeft: '8px' }}>注册于 {new Date(u.createdAt).toLocaleDateString()}</span>
             </div>
           </div>
-          {u.role !== 'admin' && (
-            <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
-              <select
-                className="check-btn"
-                value={u.role}
-                onChange={e => setRole(u.id, e.target.value)}
-                style={{ cursor: 'pointer' }}
-              >
-                <option value="user">普通用户</option>
-                <option value="admin">管理员</option>
-              </select>
-              {u.banned
-                ? <button className="check-btn" onClick={() => unban(u.id)}>解封</button>
-                : <button className="check-btn" onClick={() => ban(u.id)}>封禁</button>
-              }
-              <button className="check-btn" style={{ color: '#dc2626' }} onClick={() => del(u.id)}>删除</button>
-            </div>
-          )}
+          <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+            <button className="check-btn" onClick={() => nav(`/admin/users/${u.id}`)}>详情</button>
+            {u.role !== 'admin' && (
+              <>
+                <select
+                  className="check-btn"
+                  value={u.role}
+                  onChange={e => setRole(u.id, e.target.value)}
+                  style={{ cursor: 'pointer' }}
+                >
+                  <option value="user">普通用户</option>
+                  <option value="admin">管理员</option>
+                </select>
+                {u.banned
+                  ? <button className="check-btn" onClick={() => unban(u.id)}>解封</button>
+                  : <button className="check-btn" onClick={() => ban(u.id)}>封禁</button>
+                }
+                <button className="check-btn" style={{ color: '#dc2626' }} onClick={() => del(u.id)}>删除</button>
+              </>
+            )}
+          </div>
         </div>
       ))}
 

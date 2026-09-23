@@ -1,7 +1,7 @@
 import { Router, Response } from 'express';
 import { eq, desc, count } from 'drizzle-orm';
 import { db } from '../db';
-import { users, learningStages, practiceProjects, userProgress, learningNotes } from '../db/schema';
+import { users, learningStages, practiceProjects, learningResources, experiments, userProgress, learningNotes } from '../db/schema';
 import { authMiddleware, adminMiddleware, AuthRequest } from '../middleware/auth';
 
 const router = Router();
@@ -131,6 +131,80 @@ router.post('/projects', async (req: AuthRequest, res: Response) => {
 router.delete('/projects/:id', async (req: AuthRequest, res: Response) => {
   await db.delete(practiceProjects).where(eq(practiceProjects.id, req.params.id as any));
   res.json({ success: true });
+});
+
+// ===== 内容管理：学习资料 =====
+router.get('/resources', async (_req, res: Response) => {
+  const items = await db.select().from(learningResources).orderBy(learningResources.category);
+  res.json(items);
+});
+
+router.post('/resources', async (req: AuthRequest, res: Response) => {
+  const { title, category, type, description, url, stageNumber } = req.body;
+  const [item] = await db.insert(learningResources)
+    .values({ title, category, type, description, url, stageNumber })
+    .returning();
+  res.json(item);
+});
+
+router.put('/resources/:id', async (req: AuthRequest, res: Response) => {
+  const { title, category, type, description, url, stageNumber } = req.body;
+  const [item] = await db.update(learningResources)
+    .set({ title, category, type, description, url, stageNumber })
+    .where(eq(learningResources.id, req.params.id as any))
+    .returning();
+  if (!item) return res.status(404).json({ error: '资料不存在' });
+  res.json(item);
+});
+
+router.delete('/resources/:id', async (req: AuthRequest, res: Response) => {
+  await db.delete(learningResources).where(eq(learningResources.id, req.params.id as any));
+  res.json({ success: true });
+});
+
+// ===== 内容管理：实验 =====
+router.get('/experiments', async (_req, res: Response) => {
+  const items = await db.select().from(experiments).orderBy(experiments.expNumber);
+  res.json(items);
+});
+
+router.post('/experiments', async (req: AuthRequest, res: Response) => {
+  const { expNumber, title, category, description, content, difficulty, duration } = req.body;
+  const [item] = await db.insert(experiments)
+    .values({ expNumber, title, category, description, content, difficulty, duration })
+    .returning();
+  res.json(item);
+});
+
+router.put('/experiments/:id', async (req: AuthRequest, res: Response) => {
+  const { expNumber, title, category, description, content, difficulty, duration } = req.body;
+  const [item] = await db.update(experiments)
+    .set({ expNumber, title, category, description, content, difficulty, duration })
+    .where(eq(experiments.id, req.params.id as any))
+    .returning();
+  if (!item) return res.status(404).json({ error: '实验不存在' });
+  res.json(item);
+});
+
+router.delete('/experiments/:id', async (req: AuthRequest, res: Response) => {
+  await db.delete(experiments).where(eq(experiments.id, req.params.id as any));
+  res.json({ success: true });
+});
+
+// ===== 用户学习进度 =====
+router.get('/users/:id/progress', async (req: AuthRequest, res: Response) => {
+  const progress = await db.select().from(userProgress)
+    .where(eq(userProgress.userId, req.params.id as any))
+    .orderBy(desc(userProgress.createdAt));
+  res.json(progress);
+});
+
+// ===== 用户笔记 =====
+router.get('/users/:id/notes', async (req: AuthRequest, res: Response) => {
+  const notes = await db.select().from(learningNotes)
+    .where(eq(learningNotes.userId, req.params.id as any))
+    .orderBy(desc(learningNotes.updatedAt));
+  res.json(notes);
 });
 
 export default router;

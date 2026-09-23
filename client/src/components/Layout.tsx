@@ -33,6 +33,20 @@ export default function Layout() {
               {m.label}
             </NavLink>
           ))}
+          {user?.role === 'admin' && (
+            <>
+              <div style={{ padding: '12px 14px 4px', fontSize: 11, color: 'var(--text-secondary)', textTransform: 'uppercase' }}>管理员</div>
+              <NavLink to="/admin" end className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}>
+                <span className="nav-icon">🛡️</span>管理后台
+              </NavLink>
+              <NavLink to="/admin/users" className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}>
+                <span className="nav-icon">👥</span>用户管理
+              </NavLink>
+              <NavLink to="/admin/content" className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}>
+                <span className="nav-icon">✏️</span>内容管理
+              </NavLink>
+            </>
+          )}
         </nav>
         <div className="sidebar-footer">
           {user && (

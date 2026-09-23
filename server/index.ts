@@ -4,6 +4,7 @@ import cors from 'cors';
 import path from 'path';
 import authRoutes from './routes/auth';
 import learningRoutes from './routes/learning';
+import adminRoutes from './routes/admin';
 
 const app = express();
 const PORT = parseInt(process.env.PORT || '3000', 10);
@@ -13,6 +14,7 @@ app.use(express.json());
 
 // API 路由
 app.use('/api/auth', authRoutes);
+app.use('/api/admin', adminRoutes);
 app.use('/api', learningRoutes);
 
 // 生产环境：托管前端静态文件

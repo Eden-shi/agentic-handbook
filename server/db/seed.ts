@@ -10,8 +10,8 @@ async function seed() {
   const adminExists = await db.select().from(users).where(eq(users.email, 'admin@example.com')).limit(1);
   if (adminExists.length === 0) {
     const passwordHash = await bcrypt.hash('admin123', 10);
-    await db.insert(users).values({ email: 'admin@example.com', username: 'admin', passwordHash });
-    console.log('  ✓ 创建默认账号 admin / admin123');
+    await db.insert(users).values({ email: 'admin@example.com', username: 'admin', passwordHash, role: 'admin' });
+    console.log('  ✓ 创建默认管理员账号 admin / admin123');
   }
 
   const stages = [

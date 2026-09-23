@@ -23,8 +23,8 @@ router.post('/register', async (req: Request, res: Response) => {
     }
     const passwordHash = await bcrypt.hash(password, 10);
     const [user] = await db.insert(users).values({ email, username, passwordHash }).returning();
-    const token = generateToken(user.id, user.email, user.username);
-    res.json({ token, user: { id: user.id, email: user.email, username: user.username } });
+    const token = generateToken(user.id, user.email, user.username, user.role);
+    res.json({ token, user: { id: user.id, email: user.email, username: user.username, role: user.role } });
   } catch (e: any) {
     if (e.code === '23505') {
       return res.status(409).json({ error: '邮箱或用户名已存在' });
@@ -44,12 +44,15 @@ router.post('/login', async (req: Request, res: Response) => {
     if (!user) {
       return res.status(401).json({ error: '邮箱或密码错误' });
     }
+    if (user.banned) {
+      return res.status(403).json({ error: '账号已被封禁' });
+    }
     const valid = await bcrypt.compare(password, user.passwordHash);
     if (!valid) {
       return res.status(401).json({ error: '邮箱或密码错误' });
     }
-    const token = generateToken(user.id, user.email, user.username);
-    res.json({ token, user: { id: user.id, email: user.email, username: user.username } });
+    const token = generateToken(user.id, user.email, user.username, user.role);
+    res.json({ token, user: { id: user.id, email: user.email, username: user.username, role: user.role } });
   } catch {
     res.status(500).json({ error: '登录失败' });
   }
@@ -57,7 +60,7 @@ router.post('/login', async (req: Request, res: Response) => {
 
 // 获取当前用户
 router.get('/me', authMiddleware, (req: AuthRequest, res: Response) => {
-  res.json({ id: req.userId, email: req.userEmail, username: req.username });
+  res.json({ id: req.userId, email: req.userEmail, username: req.username, role: req.userRole });
 });
 
 export default router;

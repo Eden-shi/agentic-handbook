@@ -12,6 +12,9 @@ import About from './pages/About';
 import Login from './pages/Login';
 import StageDetail from './pages/StageDetail';
 import ProjectDetail from './pages/ProjectDetail';
+import Admin from './pages/admin/Admin';
+import AdminUsers from './pages/admin/AdminUsers';
+import AdminContent from './pages/admin/AdminContent';
 
 export default function App() {
   return (
@@ -28,6 +31,9 @@ export default function App() {
         <Route path="notes" element={<Notes />} />
         <Route path="settings" element={<Settings />} />
         <Route path="about" element={<About />} />
+        <Route path="admin" element={<Admin />} />
+        <Route path="admin/users" element={<AdminUsers />} />
+        <Route path="admin/content" element={<AdminContent />} />
       </Route>
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>

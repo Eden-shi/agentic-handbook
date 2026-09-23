@@ -5,6 +5,8 @@ export const users = pgTable('app_user', {
   email: varchar('email', { length: 255 }).unique().notNull(),
   username: varchar('username', { length: 100 }).unique().notNull(),
   passwordHash: varchar('password_hash', { length: 255 }).notNull(),
+  role: varchar('role', { length: 20 }).default('user').notNull(),
+  banned: boolean('banned').default(false).notNull(),
   createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
 });
 

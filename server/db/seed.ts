@@ -15,227 +15,779 @@ async function seed() {
   }
 
   const stages = [
+    // ===== 阶段1：零代码，建立直觉 =====
     {
-      stageNumber: 1, title: '智能体核心概念与生态', subtitle: '理解什么是智能体，以及2026年的框架格局', duration: '3-5天',
-      topics: ['智能体定义', '感知-决策-行动循环', 'LLM 作为推理引擎', '2026年框架格局', 'MCP 协议概览'],
-      resources: ['LLM 智能体综述', 'LangGraph vs CrewAI 2026'],
-      description: '从最基础的概念出发，建立对智能体的整体认知，了解2026年主流框架的定位和选择。',
-      content: `## 什么是智能体
+      stageNumber: 1,
+      title: '认识智能体',
+      subtitle: '不用写代码，先搞懂智能体是什么',
+      duration: '1-2天',
+      topics: ['智能体 vs 聊天机器人', '感知-决策-行动循环', 'LLM 扮演什么角色', '为什么需要工具'],
+      resources: ['LLM 智能体综述'],
+      description: '完全零代码入门。先建立直觉：智能体到底是什么，和你平时用的ChatGPT有什么区别，它为什么需要"工具"。',
+      content: `## 这一阶段你要学什么
 
-智能体（Agent）是以大语言模型为推理核心，能够**感知环境、自主决策、调用工具、执行行动**的系统。
+这一阶段**不用写代码**。目标只有一个：搞懂"智能体"这个词到底指什么，以及它和你平时用的聊天机器人有什么本质区别。
 
-和传统程序的区别：
-- **传统程序**：流程是人写死的
-- **智能体**：流程是模型动态决策的
+## 先做个小实验
 
-## 核心循环
+打开任意一个聊天AI（ChatGPT、Claude、豆包都行），问它：
 
-感知 → 思考 → 行动，不断重复直到任务完成。
+> "帮我算一下 12345 × 67890 等于多少？"
 
-## 2026年框架格局
+观察它的回答。它可能会：
+- 给出一个计算结果，但可能算错
+- 或者说"我帮你算一下"然后给出一个数字
 
-截至2026年，智能体框架市场已经整合：
+问题来了：**它真的"算"了吗？** 没有。它只是在"猜"答案——根据训练数据中类似的计算模式，生成一个看起来对的数字。这就是为什么大模型做数学题经常出错。
 
-| 框架 | 定位 | 适合场景 |
-|------|------|----------|
-| **LangGraph** | 有状态工作流运行时 | 生产级复杂流程，需要checkpoint和人工审批 |
-| **CrewAI** | 角色化多智能体 | 快速原型，按角色分工的团队模式 |
-| **OpenAI Agents SDK** | 官方轻量框架 | 基于OpenAI模型的快速开发 |
-| **LlamaIndex Workflows** | 事件驱动管道 | RAG和数据处理流水线 |
-| **AG2 (AutoGen)** | 对话式编排 | 多智能体对话和研究场景 |
+## 智能体和聊天机器人的区别
 
-**生产选择建议**：复杂有状态流程选 LangGraph；快速原型选 CrewAI；纯OpenAI生态选 Agents SDK。
+普通聊天机器人：你问一句，它答一句。它不知道现在几点、不知道你的数据库里有什么、不能帮你发邮件。
 
-## MCP 协议（Model Context Protocol）
+智能体：它有**手**和**眼睛**。它能：
+- 查日历知道今天是什么日子
+- 查数据库知道你的订单状态
+- 调用计算器真的算出 12345 × 67890
+- 调用搜索查最新的新闻
 
-Anthropic 2024年底推出的开放标准，2025-2026年成为事实标准——OpenAI、Google都已支持。
+## 智能体的核心循环
 
-**MCP 解决什么问题**：以前每个AI应用要对接每个工具都要写一遍集成，就像每个手机都用不同充电器。MCP 就是 AI 的"USB-C"——写一个MCP server，所有支持MCP的客户端都能连。
+一个最小的智能体，一直在做这三件事的循环：
 
-截至2026年，MCP SDK月下载量超过9700万，生态工具覆盖文件系统、数据库、浏览器、API等。`,
+1. **感知**：看看现在的情况（用户说了什么、工具返回了什么结果）
+2. **思考**：LLM 想一下，下一步该干嘛
+3. **行动**：如果需要调工具就调工具，不需要就直接回答用户
+
+这个循环一直重复，直到模型说"任务完成了，这是最终答案"。
+
+## 为什么要先学这个再写代码
+
+很多人一上来就写代码，结果写了一堆但不知道自己在干嘛。先把这个循环想清楚，后面每写一行代码你都知道它在循环里扮演什么角色。
+
+## 本阶段练习（不用写代码）
+
+1. 想三个你平时用聊天AI做不到、但"如果它能调用工具就能做到"的事情
+2. 把这三件事分别对应到"感知→思考→行动"循环里
+3. 想一下：哪一步是LLM做的，哪一步是你的代码做的？
+
+## 常见误区
+
+- ❌ "智能体就是更聪明的聊天机器人"——不对，核心区别是能不能**调用外部能力**
+- ❌ "LLM自己什么都能做"——不对，LLM只会生成文字，工具是你的代码提供的
+- ❌ "智能体很复杂"——最小的智能体循环其实就20行代码，下一阶段就写`,
     },
+
+    // ===== 阶段2：第一次代码，调API =====
     {
-      stageNumber: 2, title: '提示工程与结构化输出', subtitle: '写出可控、可复现、结构化的提示词', duration: '2-4天',
-      topics: ['系统提示词设计', '角色与约束', 'Few-shot 示例', '思维链 CoT', '结构化输出 JSON mode'],
-      resources: ['提示工程最佳实践', 'OpenAI Structured Outputs 文档'],
-      description: '掌握提示词工程的核心技巧。2026年主流模型都支持结构化输出，可控性大幅提升。',
-      content: `## 为什么提示词是智能体的"代码"
+      stageNumber: 2,
+      title: '第一次调用 LLM API',
+      subtitle: '写人生第一段智能体代码，跑通一个最简单的调用',
+      duration: '2-3天',
+      topics: ['选模型和获取API Key', '第一个Hello World', 'temperature 参数', 'system vs user 消息'],
+      resources: ['OpenAI API 快速开始'],
+      description: '从这一阶段开始写代码。目标是用最少的代码跑通一次LLM调用，理解最基本的参数含义。',
+      content: `## 这一阶段你要学什么
 
-智能体的行为逻辑主要写在提示词里。同一个模型，不同提示词，行为天差地别。
+写出你的**第一行智能体代码**：用几行代码，让LLM回答你的问题。不接工具、不搞复杂架构，先把最基本的调用跑通。
 
-## 系统提示词四要素
+## 第一步：选一个模型平台
 
-1. **角色**：你是谁
-2. **任务**：你要做什么
-3. **约束**：不能做什么（如"不要编造"）
-4. **输出格式**：2026年主流模型都支持 JSON mode，直接用 schema 约束输出
+你需要一个能调用大模型API的账号。2026年主流选择：
+
+| 平台 | 特点 | 适合 |
+|------|------|------|
+| OpenAI | 生态最成熟，文档全 | 有信用卡、能访问海外 |
+| Anthropic Claude | 长文本和推理强 | 同上 |
+| 国产模型（DeepSeek/通义/豆包） | 国内直连，便宜 | 国内用户首选 |
+
+不管选哪个，调用方式都差不多——HTTP请求，传messages，拿回复。
+
+## 第二步：写第一个调用
+
+以 OpenAI SDK 为例（其他平台用法几乎一样）：
+
+\`\`\`typescript
+import OpenAI from 'openai';
+
+const client = new OpenAI({
+  apiKey: process.env.OPENAI_API_KEY,
+});
+
+async function main() {
+  const response = await client.chat.completions.create({
+    model: 'gpt-4o',
+    messages: [
+      { role: 'system', content: '你是一个友好的助手。' },
+      { role: 'user', content: '你好，介绍一下你自己。' },
+    ],
+  });
+
+  console.log(response.choices[0].message.content);
+}
+
+main();
+\`\`\`
+
+跑起来，你应该能看到模型的自我介绍。恭喜，你已经跑通了最基本的LLM调用！
+
+## 关键参数理解
+
+**system 消息 vs user 消息：**
+- system：给模型的"角色设定"和规则，在对话开始前设定好
+- user：用户说的话
+
+**temperature：**
+- 0 = 每次回答基本一样，适合需要稳定输出的场景
+- 1 = 更有创意，但也更容易胡说
+- 刚开始学就用 0.7 左右
+
+**max_tokens：**
+- 控制回答最长多长。新手不用管，用默认值就行。
+
+## 练习任务
+
+1. 写一个程序，让模型扮演某个角色（比如"你是一个Python老师"），然后和它对话3轮
+2. 试试把 temperature 调到 0 和 1，问同一个问题5次，对比回答有什么不同
+3. 试试写一个system prompt："你只能回答Python相关的问题，其他问题说不知道"
+
+## 常见坑
+
+- API Key 放代码里提交到GitHub了 → **永远用环境变量**
+- 网络不通 → 国内用海外模型可能需要代理，或者换国产模型
+- 401错误 → API Key错了或者没填对
+- 429错误 → 额度用完了或者请求太频繁
+
+## 下一阶段预告
+
+这一阶段你只是"调模型聊天"。下一阶段我们学怎么写好提示词，让模型输出更可控。`,
+    },
+
+    // ===== 阶段3：提示词工程 =====
+    {
+      stageNumber: 3,
+      title: '提示词工程',
+      subtitle: '学会怎么"和模型说话"，让输出可控可复现',
+      duration: '3-4天',
+      topics: ['系统提示词结构', 'Few-shot 示例', '结构化输出 JSON', '思维链提示', '常见提示词坑'],
+      resources: ['提示工程最佳实践', '结构化输出指南'],
+      description: '还是纯对话（不接工具），但学会写好提示词。这是智能体开发的基本功——提示词写不好，后面接再多工具也白搭。',
+      content: `## 这一阶段你要学什么
+
+上一阶段你已经能调模型了。这一阶段解决一个问题：**怎么让模型输出你想要的东西，而不是自由发挥。**
+
+智能体的行为很大程度上由提示词决定。提示词就是智能体的"代码"——写得好，模型听话；写得烂，模型胡说八道。
+
+## 系统提示词的四要素
+
+一个靠谱的系统提示词，通常包含四部分：
+
+\`\`\`
+# 角色
+你是一个代码审查助手。
+
+# 任务
+用户给你一段代码，你找出其中的bug和改进建议。
+
+# 约束
+- 不要编造不存在的API
+- 不确定的地方说"不确定"，不要猜
+- 只说真正的问题，不要泛泛而谈
+
+# 输出格式
+用JSON输出，格式：
+{
+  "issues": [{"severity": "high/medium/low", "description": "..."}],
+  "summary": "..."
+}
+\`\`\`
+
+把这四部分写清楚，模型的输出质量会立刻提升一个档次。
 
 ## Few-shot：给例子比讲道理管用
 
-给 2-3 个输入→输出示例，比写一大段描述效果好得多。
+光靠文字描述要求，模型可能不理解。最好的办法是给一两个例子：
+
+\`\`\`
+用户: 计算 2+3
+助手: {"result": 5}
+
+用户: 计算 10*4
+助手: {"result": 40}
+
+用户: 计算 8+1
+助手:
+\`\`\`
+
+模型一看例子就知道该怎么输出了。**给2-3个例子，比写一大段描述效果好得多。**
+
+## 结构化输出（2026年新方式）
+
+以前要让模型输出JSON，得在提示词里反复强调"请输出JSON格式"，模型还经常不遵守。
+
+现在主流模型都支持**结构化输出**——你直接给它一个JSON Schema，模型会严格按格式输出，不会出错。
+
+Python示例：
+\`\`\`python
+from pydantic import BaseModel
+
+class ReviewResult(BaseModel):
+    issues: list[str]
+    severity: str
+
+response = client.chat.completions.create(
+    model="gpt-4o",
+    messages=[{"role": "user", "content": "审查这段代码..."}],
+    response_format=ReviewResult,  # 直接传schema
+)
+\`\`\`
+
+这比在提示词里写"请输出JSON"可靠多了。
 
 ## 思维链（Chain of Thought）
 
-多步推理任务让模型"一步步想"，准确率显著提升。这是后续规划阶段的基础。
+当任务需要多步推理时，直接问模型答案，它容易跳步出错。
 
-## 2026年新实践
+技巧：在提示词里加一句"请一步步思考"，或者让它先输出推理过程再给答案：
 
-- **结构化输出**：主流模型原生支持 JSON Schema，不需要靠提示词"硬约束"
-- **Prompt 版本管理**：用 Langfuse/LangSmith 管理提示词版本，支持 A/B 测试
-- **Prompt Caching**：长系统提示词可以缓存，降低成本和延迟`,
+\`\`\`
+请先分析问题，一步步思考，最后给出答案。
+\`\`\`
+
+这叫思维链提示，准确率会显著提升。
+
+## 练习任务
+
+1. 写一个系统提示词，让模型扮演"英语老师"，纠正用户的语法错误
+2. 用 Few-shot 教模型把自由文本转换成固定格式
+3. 试试结构化输出，让模型输出一个包含标题和摘要的JSON
+4. 拿同一个问题，用不同的提示词问3次，对比输出差异
+
+## 常见坑
+
+- **提示词太长**：重要指令被淹没了 → 把最重要的放开头和结尾
+- **约束太模糊**："写得好一点"不算约束 → 用具体的例子说明什么叫好
+- **一次塞太多任务**：让模型同时做好几件事，结果每件都做不好 → 拆成多个任务
+
+## 下一阶段预告
+
+现在你已经能让模型输出可控了。下一阶段我们让模型**调用工具**——从"只会说话"变成"能做事"。`,
     },
+
+    // ===== 阶段4：工具调用入门 =====
     {
-      stageNumber: 3, title: '工具调用与 MCP', subtitle: '让智能体能调用外部能力，掌握 MCP 标准', duration: '4-6天',
-      topics: ['Function Calling', 'MCP 模型上下文协议', '工具描述规范', '错误处理与重试', 'MCP Server 开发'],
-      resources: ['MCP 官方文档', 'Function Calling 文档', '接入计算器工具实验'],
-      description: '学习如何为智能体接入真实工具。2026年 MCP 已成为工具接入的事实标准。',
-      content: `## Function Calling
+      stageNumber: 4,
+      title: '工具调用入门',
+      subtitle: '让智能体第一次"动手做事"——Function Calling',
+      duration: '4-5天',
+      topics: ['Function Calling 原理', '定义第一个工具', '处理工具调用响应', '工具结果回传', '错误处理'],
+      resources: ['Function Calling 官方文档'],
+      description: '从这一阶段开始，你的智能体不再只会聊天了。学会怎么定义工具、怎么让模型决定调工具、怎么把结果喂回去。',
+      content: `## 这一阶段你要学什么
 
-你告诉模型有哪些工具可用（名称、描述、参数 schema），模型在需要时输出结构化的工具调用请求。
+到目前为止，你的智能体只会"说"。这一阶段让它第一次"做"——学会调用工具。
 
-## MCP 协议（重点）
+我们从最简单的工具开始：**计算器**。让模型遇到数学问题时，真的调用计算器算，而不是自己瞎猜。
 
-MCP（Model Context Protocol）是 Anthropic 推出的开放标准，2026年已成为 AI 工具接入的事实标准。
+## Function Calling 是什么
 
-**为什么学 MCP**：
-- 不用 MCP：每个工具都要写定制集成，N个工具 × M个应用 = NM 次集成
-- 用 MCP：工具实现一次 MCP server，所有支持 MCP 的应用都能连
+普通对话：你发消息 → 模型回消息
 
-**MCP 核心概念**：
-- **Resources**：数据（文件、数据库记录）
-- **Tools**：可执行的操作（查询、计算、API调用）
-- **Prompts**：预定义提示词模板
+工具调用：你发消息（附带可用工具列表）→ 模型说"我要调用XX工具" → 你执行工具 → 把结果给模型 → 模型基于结果回答
 
-**传输方式**：Stdio（本地进程）、HTTP SSE、Streamable HTTP
+## 第一步：定义一个工具
 
-## 工具描述怎么写
+你需要告诉模型有哪些工具可用，每个工具接受什么参数：
 
-工具描述是写给模型看的——模型靠它决定什么时候用。要说清楚做什么、什么时候该用、什么时候不该用。
+\`\`\`python
+tools = [
+    {
+        "type": "function",
+        "function": {
+            "name": "calculator",
+            "description": "计算两个数字的运算。当用户问数学问题时使用。",
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "a": {"type": "number", "description": "第一个数字"},
+                    "b": {"type": "number", "description": "第二个数字"},
+                    "operation": {
+                        "type": "string",
+                        "enum": ["add", "subtract", "multiply", "divide"],
+                        "description": "运算类型"
+                    }
+                },
+                "required": ["a", "b", "operation"]
+            }
+        }
+    }
+]
+\`\`\`
+
+注意几个关键点：
+- **description 是写给模型看的**，模型靠它判断什么时候用这个工具
+- 参数名要有意义，description 要具体
+- required 里的参数必须填上
+
+## 第二步：调用模型，看它要不要用工具
+
+\`\`\`python
+response = client.chat.completions.create(
+    model="gpt-4o",
+    messages=[{"role": "user", "content": "帮我算一下 123 * 456"}],
+    tools=tools,
+)
+
+msg = response.choices[0].message
+print(msg.tool_calls)  # 模型要调用工具
+\`\`\`
+
+模型会返回类似这样的结构：
+\`\`\`json
+{
+  "tool_calls": [{
+    "id": "call_abc123",
+    "function": {
+      "name": "calculator",
+      "arguments": '{"a": 123, "b": 456, "operation": "multiply"}'
+    }
+  }]
+}
+\`\`\`
+
+## 第三步：执行工具，把结果喂回去
+
+\`\`\`python
+# 把模型的决定加入对话历史
+messages.append(msg)
+
+# 执行计算器
+args = json.loads(msg.tool_calls[0].function.arguments)
+result = calculate(args["a"], args["b"], args["operation"])
+
+# 把工具结果作为新消息发给模型
+messages.append({
+    "role": "tool",
+    "tool_call_id": msg.tool_calls[0].id,
+    "content": str(result),  # 56088
+})
+
+# 再调一次模型，让它基于工具结果回答
+final_response = client.chat.completions.create(
+    model="gpt-4o",
+    messages=messages,
+    tools=tools,
+)
+print(final_response.choices[0].message.content)
+\`\`\`
+
+这就是一个完整的"感知→思考→行动"循环！
 
 ## 错误处理
 
-工具失败时把错误信息原样喂回模型，让模型自己判断重试、换参数还是告知用户失败。设置最大重试次数防止死循环。`,
+工具可能失败（API超时、参数不对、数据库连不上）。关键原则：
+
+**不要吞掉错误，把错误信息原样传回给模型。**
+
+\`\`\`python
+try:
+    result = call_external_api(...)
+except Exception as e:
+    result = f"调用失败: {str(e)}"  # 把错误给模型看
+
+messages.append({
+    "role": "tool",
+    "tool_call_id": ...,
+    "content": result,
+})
+\`\`\`
+
+模型看到错误后，会自己决定：重试？换个参数？还是告诉用户失败了。这比你硬编码"失败了就报错"智能多了。
+
+但要加个**最大重试次数**，防止模型陷入死循环。
+
+## 练习任务
+
+1. 实现一个计算器工具，支持加减乘除
+2. 实现一个天气查询工具（调用一个免费天气API）
+3. 测试：故意问一个需要调工具的问题，观察模型的决策过程
+4. 测试：工具报错时，模型会怎么处理
+
+## 常见坑
+
+- 工具描述写得不清楚 → 模型不知道什么时候用，或者乱用
+- 参数名是 a, b, c → 模型不知道该传什么，改成有意义的名字
+- 忘了把 tool 消息加回 messages → 模型不知道工具调用的结果
+- 没有最大步数限制 → 模型一直调工具停不下来
+
+## 下一阶段预告
+
+你已经会写一个工具了。但如果有10个工具呢？每个都写一遍集成？下一阶段学 MCP——一个标准协议，写一次到处用。`,
     },
+
+    // ===== 阶段5：MCP协议 =====
     {
-      stageNumber: 4, title: '记忆与 RAG', subtitle: '让智能体记住历史，检索相关知识', duration: '3-5天',
-      topics: ['短期对话记忆', '长期记忆存储', '上下文窗口优化', 'RAG 检索增强生成', '记忆淘汰策略'],
-      resources: ['RAG 评测指南', '记忆系统设计模式', '上下文窗口实验'],
-      description: '理解智能体的记忆机制。2026年 RAG 已经从简单向量检索进化到混合检索+重排序。',
-      content: `## 记忆的三个层次
+      stageNumber: 5,
+      title: 'MCP 协议与工具生态',
+      subtitle: '用标准协议接入工具，写一次到处用',
+      duration: '4-6天',
+      topics: ['MCP 是什么', 'MCP 核心概念', '写一个 MCP Server', '连接现有 MCP 工具', 'MCP 安全与权限'],
+      resources: ['MCP 官方文档', 'FastMCP 快速入门'],
+      description: '上一阶段你写了一个计算器工具。但如果每个工具都要单独写集成，N个工具×M个应用=NM次工作。MCP 解决的就是这个问题。',
+      content: `## 这一阶段你要学什么
 
-1. **短期记忆**：当前对话历史，存在上下文窗口
-2. **长期记忆**：用户偏好、事实结论，存外部数据库
-3. **工作记忆**：当前任务中间结果
+上一阶段你学会了怎么给模型加一个工具。现在想一个问题：
 
-## 上下文窗口策略
+你写了一个天气查询工具，很好用。但如果以后你做另一个智能体项目，又要重新写一遍天气集成？如果别人写的工具你也想用呢？
 
-对话一长早期消息会被挤出去。常见策略：摘要压缩、截断最近N轮、RAG按需检索。
+**MCP（Model Context Protocol）就是解决这个问题的标准协议。**
 
-## RAG（检索增强生成）2026实践
+## MCP 解决了什么问题
 
-RAG 不只是"向量相似度搜索"了，2026年的生产级 RAG 通常包含：
+没有 MCP 的世界：
+- 你给 Claude 写了一个 GitHub 集成
+- 又给 Cursor 写了一个 GitHub 集成
+- 又给另一个AI写了一个 GitHub 集成
+- 每个AI应用都要单独对接每个工具
 
-1. **混合检索**：向量搜索 + 关键词搜索（BM25）结合
-2. **重排序（Rerank）**：用 Cross-encoder 对初步结果重排序
-3. **上下文压缩**：把检索到的长文档压缩成相关片段
-4. **评测**：分别评测检索质量（context precision）和生成质量（faithfulness）
+有 MCP 的世界：
+- 工具开发者写一个 MCP Server（GitHub MCP Server）
+- 所有支持 MCP 的AI应用（Claude/Cursor/OpenAI/...）都能直接用
+- 就像 USB-C 接口——一个线充所有手机
 
-## 不要什么都记
+截至2026年，MCP 已经是事实标准，Anthropic、OpenAI、Google 都已支持，SDK 月下载量超过9700万。
 
-噪声记忆会干扰模型。好的记忆系统：只存值得记住的、有遗忘机制、检索时只注入最相关的。`,
+## MCP 三个核心概念
+
+**Resources（资源）**：能读取的数据。比如文件内容、数据库记录、网页。
+**Tools（工具）**：能执行的操作。比如发邮件、创建issue、查询天气。
+**Prompts（提示模板）**：预定义的提示词模板。
+
+你的智能体作为 **MCP Client**，连接各种 **MCP Server**，Server 提供工具，Client 调用。
+
+## 写一个最简单的 MCP Server
+
+用 FastMCP（Python）写一个计算器 MCP Server：
+
+\`\`\`python
+from mcp.server.fastmcp import FastMCP
+
+mcp = FastMCP("calculator")
+
+@mcp.tool()
+def add(a: float, b: float) -> float:
+    """计算两个数的和"""
+    return a + b
+
+@mcp.tool()
+def multiply(a: float, b: float) -> float:
+    """计算两个数的乘积"""
+    return a * b
+
+if __name__ == "__main__":
+    mcp.run()  # 默认 stdio 传输
+\`\`\`
+
+就这么简单！这个 Server 跑起来后，任何支持 MCP 的客户端都能连接它，发现 add 和 multiply 两个工具。
+
+## 连接 MCP Server
+
+在你的智能体代码里，连接这个 MCP Server：
+
+\`\`\`python
+from mcp import ClientSession, StdioServerParameters
+from mcp.client.stdio import stdio_client
+
+async def main():
+    # 连接到计算器 MCP Server
+    server_params = StdioServerParameters(
+        command="python",
+        args=["calculator_server.py"],
+    )
+    async with stdio_client(server_params) as (read, write):
+        async with ClientSession(read, write) as session:
+            await session.initialize()
+            # 发现可用工具
+            tools = await session.list_tools()
+            # 调用工具
+            result = await session.call_tool("add", {"a": 3, "b": 5})
+            print(result.content[0].text)  # 8
+\`\`\`
+
+## 现成的 MCP 工具
+
+不用什么都自己写。社区已经有大量现成的 MCP Server：
+- 文件系统 MCP（读写本地文件）
+- GitHub MCP（操作仓库、issues）
+- 数据库 MCP（查询PostgreSQL/SQLite）
+- 浏览器 MCP（自动化操作网页）
+- 搜索 MCP（调用搜索API）
+
+你直接连接这些 MCP Server，就能立刻获得这些能力。
+
+## 练习任务
+
+1. 用 FastMCP 写一个计算器 MCP Server
+2. 用 MCP Inspector 连接并测试你的 Server
+3. 找一个现成的开源 MCP Server（比如文件系统），连接到你的智能体
+4. 让你的智能体能读取本地文件内容
+
+## 常见坑
+
+- MCP 工具的 description 写不清楚 → 模型不知道什么时候用
+- 传输方式搞错 → stdio 是本地进程，HTTP SSE 是远程服务
+- 安全问题 → MCP Server 能操作你的文件系统，不要连不信任的Server
+
+## 下一阶段预告
+
+现在你的智能体能调用各种工具了。但它"记性不好"——每次对话都从零开始。下一阶段加记忆和知识库。`,
     },
-    {
-      stageNumber: 5, title: '规划与工作流编排', subtitle: '用 LangGraph 构建可控的智能体工作流', duration: '4-7天',
-      topics: ['Plan-and-Execute', 'LangGraph 状态图', 'Checkpoint 与回放', '人工审批节点', '反思与自我修正'],
-      resources: ['ReAct 论文', 'LangGraph 官方教程', '任务分解练习实验'],
-      description: '构建能处理复杂任务的智能体。2026年 LangGraph 是生产级有状态工作流的事实标准。',
-      content: `## 为什么需要规划
 
-复杂任务需要拆步骤执行。直接丢给模型容易跑偏或遗漏。
+    // ===== 阶段6：记忆与RAG =====
+    {
+      stageNumber: 6,
+      title: '记忆与 RAG',
+      subtitle: '让智能体记住历史，查阅资料',
+      duration: '5-7天',
+      topics: ['对话历史管理', '上下文窗口优化', 'RAG 基础知识', '向量检索', '记忆存储策略'],
+      resources: ['RAG 实战指南', 'LangChain RAG 教程'],
+      description: '现在你的智能体每次对话都从零开始。这一阶段让它"记住"之前说过什么，还能从你的文档里查资料。',
+      content: `## 这一阶段你要学什么
+
+到目前为止，你的智能体每次回答都是"失忆"的——它不记得上一句你说了什么。这一阶段解决两个问题：
+
+1. **对话记忆**：让它记住你们之前聊过什么
+2. **知识检索**：让它能从你的文档/数据库里查资料来回答
+
+## 对话记忆：最简单的做法
+
+最简单的记忆就是把所有历史消息都传给模型：
+
+\`\`\`python
+messages = [
+    {"role": "system", "content": "你是一个助手"},
+    {"role": "user", "content": "我叫小明"},
+    {"role": "assistant", "content": "你好小明！"},
+    {"role": "user", "content": "我叫什么名字？"},
+]
+# 模型应该回答"小明"
+\`\`\`
+
+这就是记忆——把之前的对话历史都包含在请求里。
+
+## 问题：上下文窗口有限
+
+模型的上下文窗口是有限的（比如128k token）。对话一长，早期的消息就会被"挤出去"，模型就开始忘事。
+
+解决策略：
+
+**策略1：只保留最近N轮**
+最简单粗暴。比如只保留最近10轮对话。简单但可能丢掉重要信息。
+
+**策略2：摘要压缩**
+把早期对话总结成一段摘要，代替原始消息。
+
+\`\`\`python
+# 对话太长时，让模型把前10轮总结一下
+summary = client.chat.completions.create(
+    model="gpt-4o",
+    messages=[
+        {"role": "user", "content": f"请总结以下对话的关键信息：{earlier_messages}"}
+    ]
+)
+# 然后用 [summary] + 最近几轮 代替全部历史
+\`\`\`
+
+## RAG：让智能体能查资料
+
+对话记忆是"记住你们聊了什么"。RAG 是"让它能查你的知识库"。
+
+典型场景：你有一堆产品文档，用户问问题时，先从文档里找相关段落，再让模型基于这些段落回答。
+
+### RAG 的基本流程
+
+1. **准备阶段**：把文档切块 → 每块生成向量（embedding）→ 存到向量数据库
+2. **查询阶段**：
+   - 用户问题也生成向量
+   - 从向量数据库找最相似的文档块
+   - 把这些文档块放进提示词
+   - 让模型基于文档回答
+
+### 最简单的 RAG 代码
+
+\`\`\`python
+# 1. 准备：把文档切块并生成向量
+chunks = split_document(document, chunk_size=500)
+embeddings = [embed(chunk) for chunk in chunks]
+
+# 2. 查询：找最相关的块
+query_embedding = embed(user_question)
+similar_chunks = vector_db.search(query_embedding, top_k=3)
+
+# 3. 把相关块放进提示词
+prompt = f"""
+根据以下资料回答问题。如果资料里没有答案，说不知道。
+
+资料：
+{similar_chunks}
+
+问题：{user_question}
+"""
+
+# 4. 调用模型回答
+answer = llm.call(prompt)
+\`\`\`
+
+## 2026年 RAG 实践提示
+
+生产级 RAG 不只是简单向量搜索：
+- **混合检索**：向量搜索 + 关键词搜索（BM25）结合，召回更全
+- **重排序**：初步搜出10条，用 Reranker 重新排序取前3条
+- **评测**：分别评测"检索到的相关吗"和"回答忠实于原文吗"
+
+新手先跑通最简单的向量检索，再逐步加这些优化。
+
+## 练习任务
+
+1. 实现一个带对话记忆的聊天机器人，能记住用户名字
+2. 对话超过20轮时，用摘要压缩历史
+3. 选3个文档，实现一个最简单的RAG问答
+4. 测试：问一个文档里有的问题和一个文档里没有的问题
+
+## 常见坑
+
+- 记忆无限增长 → 一定要有截断或摘要策略
+- RAG 把不相关的文档塞给模型 → 检索质量决定回答质量
+- 模型编造文档里没有的内容 → 提示词里加"只根据提供的资料回答"
+
+## 下一阶段预告
+
+现在你有工具、有记忆、有知识库了。最后一步：把这些组合起来，编排成复杂的工作流，并加上监控和评测。`,
+    },
+
+    // ===== 阶段7：工作流与上线 =====
+    {
+      stageNumber: 7,
+      title: '工作流编排与上线',
+      subtitle: '从Demo到生产：编排、监控、评测',
+      duration: '6-8天',
+      topics: ['LangGraph 工作流', 'Human-in-the-loop', 'Langfuse 监控', '评测集构建', '成本与稳定性'],
+      resources: ['LangGraph 官方教程', 'Langfuse 文档'],
+      description: '最后一个阶段。把前面学的组装成完整的应用，加上监控和评测，真正能上线用。',
+      content: `## 这一阶段你要学什么
+
+前面6个阶段你分别学了：调API、写提示词、调工具、用MCP、加记忆。现在把它们组合起来，做成一个完整的、能上线的应用。
+
+## 为什么需要工作流编排
+
+如果智能体流程很简单（用户问→调一个工具→回答），不用框架也行。
+
+但复杂流程呢？比如：
+1. 先理解用户意图
+2. 如果需要查资料，调搜索工具
+3. 整理结果
+4. 写初稿
+5. 自己审查一遍
+6. 有问题就改，没问题就输出
+
+这种多步骤、有分支的流程，用代码硬写很容易乱。**工作流框架**就是帮你把流程可视化、可调试、可恢复。
 
 ## LangGraph：2026年生产级首选
 
-LangGraph 用**状态图**（State Graph）来建模智能体流程：
-- 节点 = 处理步骤（LLM调用、工具调用、人工审批）
-- 边 = 状态转移条件
-- **Checkpointing**：自动保存每步状态，出错可以回放/从断点恢复
-- **Human-in-the-loop**：在关键节点暂停，等人审批再继续
+LangGraph 把流程建模成**状态图**：
+- **节点**：每一步做什么（调LLM、调工具、人工审批）
+- **边**：从哪一步到哪一步，什么条件下走哪条路
+- **状态**：整个流程共享的数据（当前结果、历史等）
 
-**为什么是生产首选**：
-- Uber、LinkedIn、JPMorgan 在用
-- 比 CrewAI 低 30-47% token 成本
-- 确定性的图结构，便于调试和审计
+\`\`\`python
+from langgraph.graph import StateGraph, MessagesState
 
-## 其他模式
+# 定义工作流
+workflow = StateGraph(MessagesState)
 
-- **ReAct**：思考→行动→观察循环，灵活但可能跑偏
-- **Plan-and-Execute**：先出计划再执行，可控
-- **Deep Agents**：长运行工作流，支持持久化和恢复`,
-    },
-    {
-      stageNumber: 6, title: '多智能体协作', subtitle: '多个智能体如何分工配合', duration: '5-8天',
-      topics: ['角色分工设计', 'CrewAI 团队模式', '消息传递与上下文隔离', '评审与对抗', '终止条件'],
-      resources: ['多智能体系统综述', '两个智能体对话实验'],
-      description: '从单智能体到多智能体系统。2026年 CrewAI 是快速原型首选，LangGraph 用于生产级编排。',
-      content: `## 为什么需要多个智能体
+# 添加节点
+workflow.add_node("understand", understand_intent)
+workflow.add_node("search", search_info)
+workflow.add_node("draft", write_draft)
+workflow.add_node("review", review_draft)
 
-- 一个提示词塞太多角色，模型容易精神分裂
-- 没有自我批判，容易一本正经胡说
-- 上下文窗口被多角色共用，很快塞满
+# 连接节点
+workflow.set_entry_point("understand")
+workflow.add_edge("understand", "search")
+workflow.add_edge("search", "draft")
+workflow.add_edge("draft", "review")
+# review 后根据结果决定是定稿还是重写
+workflow.add_conditional_edges("review", should_revise)
 
-## 2026年多智能体框架选择
+app = workflow.compile()
+\`\`\`
 
-| 需求 | 推荐框架 |
-|------|----------|
-| 快速原型、角色化团队 | CrewAI（最易上手） |
-| 生产级、需要checkpoint | LangGraph |
-| 对话式研究 | AG2 (AutoGen) |
-| 微软生态 | Microsoft Agent Framework |
+LangGraph 的杀手锏：
+- **Checkpoint**：自动保存每一步状态，出错可以从断点恢复
+- **Human-in-the-loop**：在关键步骤暂停，等人确认再继续
+- **可观测**：每一步都有trace，知道发生了什么
 
-## 常见角色模式
+## 为什么需要监控和评测
 
-- **流水线型**：A调研 → B写稿 → C审稿
-- **辩论/评审型**：A写方案 → B挑毛病 → A修改 → B再审
-- **路由型**：调度员判断该把任务分给谁
+Demo 阶段：你手动跑，看结果对不对。
+上线之后：你不可能手动检查每一个请求。你需要：
+- **监控**：知道每天有多少请求、成功率多少、花了多少钱
+- **评测**：改了提示词后，自动跑一遍测试集，确认没改坏
 
-## 关键设计问题
+## Langfuse：开源自托管的可观测性工具
 
-- **上下文怎么传**：全量传快但爆得快；摘要传省空间但可能丢信息
-- **怎么终止**：固定轮数、评审通过、模型自判完成
-- **成本控制**：多智能体传话消耗大量token，必须设终止条件`,
-    },
-    {
-      stageNumber: 7, title: '评测、监控与上线', subtitle: '用 Langfuse/LangSmith 让智能体可观测、可迭代', duration: '3-6天',
-      topics: ['评测集构建', 'Langfuse/LangSmith 可观测性', 'Trace 调试', '成功率与成本监控', '灰度发布'],
-      resources: ['LLM 应用评测指南', 'Langfuse 官方文档', '跑一个评测集实验'],
-      description: '把智能体从 demo 带到生产。2026年可观测性工具已经很成熟，Langfuse 开源自托管，LangSmith 深度集成 LangChain。',
-      content: `## 为什么智能体需要评测
+Langfuse 能记录你的智能体的每一步：
+- 每次 LLM 调用的输入输出
+- 每次工具调用的参数和结果
+- 总耗时、总token、成本
 
-普通软件输入确定输出确定。智能体同一个问题可能给出不同回答，你需要知道**大多数情况下它做得对不对**。
+接入很简单：
+\`\`\`python
+from langfuse import Langfuse
 
-## 关键指标
+langfuse = Langfuse()
 
-- **成功率**：多少比例的任务完成了
-- **平均步数**：完成一个任务用了几轮（越多越贵越慢）
-- **延迟和成本**：用户等多久、花了多少token
-- **RAG质量**：检索相关度（context precision）、生成忠实度（faithfulness）
+# 装饰一个函数，自动记录trace
+@langfuse.observe()
+def my_agent(input):
+    # 你的智能体逻辑
+    return result
+\`\`\`
 
-## 2026年主流可观测性工具
+然后打开 Langfuse 面板，就能看到每一步发生了什么。
 
-| 工具 | 特点 | 部署方式 |
-|------|------|----------|
-| **Langfuse** | 开源、自托管、OpenTelemetry支持 | Docker部署 |
-| **LangSmith** | LangChain官方、深度集成 | SaaS |
-| **Braintrust** | 快速原型、协作友好 | SaaS |
+## 评测集怎么建
 
-**核心功能都一样**：
-- **Trace**：记录每一步LLM调用、工具调用、检索结果
-- **Eval**：跑评测集，对比不同版本
-- **监控**：成本、延迟、错误率看板
+1. 收集20-50个典型问题（正常+异常）
+2. 每个问题写清楚什么算"回答对了"
+3. 跑一遍智能体，人工标注哪些通过哪些没通过
+4. 以后每次改了代码，跑一遍评测集对比
 
-## 迭代节奏
+## 练习任务
 
-收集失败案例 → 分析Trace定位问题 → 改提示词/工具 → 跑评测确认没改坏 → 上线`,
+1. 用 LangGraph 把前面做过的某个项目重构成有状态工作流
+2. 接入 Langfuse，查看完整的执行 trace
+3. 建一个10条用例的评测集，跑一遍看通过率
+4. 故意改坏一个提示词，看评测能不能抓到
+
+## 上线 Checklist
+
+- [ ] 有评测集，改代码后能回归测试
+- [ ] 有监控，知道成功率和成本
+- [ ] 错误不会让整个系统崩，有兜底回复
+- [ ] 有最大步数限制，不会无限循环
+- [ ] 关键操作有人工审批（涉及钱/发邮件等高风险动作）
+
+## 恭喜你学完了！
+
+到这里，你已经掌握了智能体开发的完整链路：
+- 能调模型
+- 能写好提示词
+- 能接工具（包括MCP）
+- 能加记忆和知识库
+- 能编排复杂工作流
+- 能监控和评测
+
+接下来就是在真实项目里练手，越做越熟。`,
     },
   ];
 
@@ -245,15 +797,15 @@ LangGraph 用**状态图**（State Graph）来建模智能体流程：
   }
 
   const projects = [
-    { projectNumber: 1, title: '个人知识问答助手', category: '主线', difficulty: '入门', duration: '2天', prerequisites: ['阶段1', '阶段2'], deliverables: ['可用的问答 Demo', '可复用的提示词模板'], description: '基于 RAG 做一个能回答你个人笔记问题的问答助手。', content: '## 项目目标\n做一个简单的 RAG 问答助手：你给它一些文档，它能基于内容回答问题。\n\n## 验收标准\n- 文档里有的问题回答基本正确\n- 文档里没有的问题会说"不知道"而不是编\n- 用 JSON mode 约束输出格式' },
-    { projectNumber: 2, title: 'MCP 工具接入实战', category: '主线', difficulty: '入门', duration: '2天', prerequisites: ['阶段3'], deliverables: ['一个 MCP Server', '错误处理流程'], description: '写一个 MCP Server 暴露天气查询工具，让任何 MCP 客户端都能用。', content: '## 项目目标\n用 FastMCP 或原生 SDK 写一个天气查询 MCP Server。\n\n## 验收标准\n- 用任意 MCP 客户端能连接并调用工具\n- 支持错误处理和超时\n- 工具描述清晰，模型知道什么时候用' },
-    { projectNumber: 3, title: '笔记整理助手', category: '主线', difficulty: '中级', duration: '3天', prerequisites: ['阶段4'], deliverables: ['记忆持久化', '多轮对话一致性'], description: '做一个能记住你之前说过什么的笔记助手，支持长期记忆。', content: '## 项目目标\n多轮对话笔记助手，能记住之前的对话内容。\n\n## 验收标准\n- 多轮对话中能记住前面的关键信息\n- 对话很长时不会爆上下文\n- 能从历史中检索特定信息' },
-    { projectNumber: 4, title: 'LangGraph 工作流', category: '主线', difficulty: '中级', duration: '4天', prerequisites: ['阶段5'], deliverables: ['有状态工作流', 'Human-in-the-loop'], description: '用 LangGraph 构建一个带 checkpoint 和人工审批的研究报告生成器。', content: '## 项目目标\n输入一个主题，LangGraph 自动拆解调研步骤，关键节点人工审批后继续。\n\n## 验收标准\n- 用 LangGraph State Graph 建模流程\n- 支持 checkpoint，出错能回放\n- 关键步骤有人工审批节点' },
-    { projectNumber: 5, title: '代码审查搭档', category: '主线', difficulty: '高级', duration: '5天', prerequisites: ['阶段3', '阶段5'], deliverables: ['Git 集成', '结构化评审报告'], description: '读取 Git diff，用 MCP 工具调用，输出代码审查意见。', content: '## 项目目标\n输入一个 Git 分支，智能体自动分析改动并输出审查报告。\n\n## 验收标准\n- 能识别真实代码问题\n- 报告按文件/严重程度分组\n- 不编造不存在的代码' },
-    { projectNumber: 6, title: 'CrewAI 多角色客服', category: '主线', difficulty: '高级', duration: '6天', prerequisites: ['阶段6'], deliverables: ['智能路由+专员处理', '问题升级机制'], description: '用 CrewAI 模拟客服团队：接待员、技术支持、退款专员。', content: '## 项目目标\n用 CrewAI 的角色化DSL构建客服团队。\n\n## 验收标准\n- 问题能被正确路由到对应角色\n- 不同角色回答风格符合定位\n- 处理不了的能正确升级' },
-    { projectNumber: 7, title: '自动化数据分析师', category: '专项', difficulty: '高级', duration: '5天', prerequisites: ['阶段3', '阶段5'], deliverables: ['数据分析链', '图表/表格输出'], description: '给智能体一个 CSV，它自动分析数据、发现趋势、输出结论。', content: '## 项目目标\n上传 CSV，智能体自动理解数据、做统计、输出洞察。\n\n## 验收标准\n- 能正确描述基本统计量\n- 能发现明显趋势或异常\n- 关键数字有代码输出支撑' },
-    { projectNumber: 8, title: '论文阅读伙伴', category: '专项', difficulty: '中级', duration: '4天', prerequisites: ['阶段2', '阶段4'], deliverables: ['RAG 文档问答', '摘要与追问'], description: '基于 RAG 做一个论文阅读助手，支持长文档分段和追问。', content: '## 项目目标\n输入论文 PDF，输出结构化笔记并支持追问。\n\n## 验收标准\n- 长文档分段处理不丢失信息\n- 能基于论文内容回答追问\n- 不把摘要当结论' },
-    { projectNumber: 9, title: '生产级可观测性', category: '专项', difficulty: '高级', duration: '5天', prerequisites: ['阶段7'], deliverables: ['Langfuse 接入', '评测脚本'], description: '用 Langfuse 给你的智能体项目加上完整的可观测性和评测。', content: '## 项目目标\n选前面做过的项目，接入 Langfuse，加上评测集和监控。\n\n## 验收标准\n- Langfuse 能 trace 到每一步\n- 评测脚本能一键跑，输出通过率\n- 出问题能从 Trace 定位到哪一步错了' },
+    { projectNumber: 1, title: '第一个 LLM 调用', category: '主线', difficulty: '入门', duration: '半天', prerequisites: ['阶段1-2'], deliverables: ['跑通API调用', '理解基本参数'], description: '最简单的入门项目：写一个程序调用LLM，完成第一次对话。', content: '## 目标\n用最少代码调通一次LLM API，完成一次对话。\n\n## 步骤\n1. 注册模型平台账号，获取API Key\n2. 安装SDK\n3. 写一个Hello World调用\n4. 试试不同的system prompt\n\n## 验收\n- 程序能运行并输出模型回复\n- 能解释system和user消息的区别\n- 知道temperature大概影响什么' },
+    { projectNumber: 2, title: '提示词实验室', category: '主线', difficulty: '入门', duration: '1天', prerequisites: ['阶段3'], deliverables: ['提示词模板库', '结构化输出Demo'], description: '练习写提示词，掌握结构化输出。', content: '## 目标\n写一个工具，根据用户输入生成结构化的JSON回答。\n\n## 步骤\n1. 选一个任务（如邮件分类）\n2. 写system提示词\n3. 用结构化输出约束格式\n4. 测10个不同输入\n\n## 验收\n- 输出始终是合法JSON\n- 分类准确率满意' },
+    { projectNumber: 3, title: '计算器智能体', category: '主线', difficulty: '入门', duration: '1天', prerequisites: ['阶段4'], deliverables: ['第一个工具调用循环'], description: '让智能体遇到数学问题时调用计算器工具。', content: '## 目标\n实现Function Calling，让模型调用计算器。\n\n## 步骤\n1. 定义计算器工具\n2. 实现完整的调用循环\n3. 处理工具调用结果\n4. 测试数学问题\n\n## 验收\n- 模型能正确决定什么时候调计算器\n- 大数字计算不会出错\n- 工具报错时能友好处理' },
+    { projectNumber: 4, title: 'MCP 工具 Server', category: '主线', difficulty: '中级', duration: '2天', prerequisites: ['阶段5'], deliverables: ['一个MCP Server', '能被客户端连接'], description: '用FastMCP写一个自己的工具服务，供任何MCP客户端使用。', content: '## 目标\n写一个自定义MCP Server，比如待办事项管理工具。\n\n## 步骤\n1. 用FastMCP定义几个工具（添加/查看/删除待办）\n2. 本地存储数据\n3. 用MCP Inspector测试\n4. 连接到你的智能体应用\n\n## 验收\n- MCP客户端能发现并调用你的工具\n- 工具能正确读写数据\n- 多个客户端连同一个Server正常工作' },
+    { projectNumber: 5, title: '带记忆的聊天助手', category: '主线', difficulty: '中级', duration: '2天', prerequisites: ['阶段6'], deliverables: ['对话记忆功能'], description: '做一个能记住多轮对话的聊天助手。', content: '## 目标\n实现一个多轮对话助手，能记住之前聊过的内容。\n\n## 步骤\n1. 维护对话历史\n2. 实现摘要压缩（对话太长时）\n3. 加入用户偏好记忆\n4. 测试长对话\n\n## 验收\n- 对话20轮后还记得早期信息\n- 上下文不会爆\n- 用户偏好能跨对话记住' },
+    { projectNumber: 6, title: 'RAG 文档问答', category: '主线', difficulty: '中级', duration: '3天', prerequisites: ['阶段6'], deliverables: ['知识库问答系统'], description: '基于RAG做一个能回答你文档问题的助手。', content: '## 目标\n上传几份文档，做一个能基于文档内容回答问题的助手。\n\n## 步骤\n1. 准备文档并切块\n2. 实现向量检索\n3. 把检索结果放进提示词\n4. 测试文档内和文档外问题\n\n## 验收\n- 文档内问题回答准确\n- 文档外问题会说不知道\n- 回答能引用来源' },
+    { projectNumber: 7, title: 'LangGraph 工作流', category: '主线', difficulty: '高级', duration: '4天', prerequisites: ['阶段7'], deliverables: ['有状态工作流', 'Human-in-the-loop'], description: '用LangGraph构建一个多步骤的研究报告生成器。', content: '## 目标\n输入一个主题，自动调研→写初稿→审查→定稿。\n\n## 步骤\n1. 用LangGraph StateGraph建模流程\n2. 实现调研节点（调搜索工具）\n3. 实现写作节点\n4. 加入审查节点和条件跳转\n5. 加checkpoint\n\n## 验收\n- 流程能完整跑完\n- 某一步失败能从checkpoint恢复\n- 审查不通过会自动重写' },
+    { projectNumber: 8, title: '智能体监控面板', category: '专项', difficulty: '高级', duration: '3天', prerequisites: ['阶段7'], deliverables: ['Langfuse接入', '基础指标看板'], description: '给你的智能体项目加上完整的监控和评测。', content: '## 目标\n接入Langfuse，建立评测集。\n\n## 步骤\n1. 接入Langfuse SDK\n2. 记录所有LLM调用和工具调用\n3. 建10条测试用例的评测集\n4. 跑一遍评测，查看通过率\n5. 在Langfuse面板查看trace\n\n## 验收\n- 能在Langfuse看到完整trace\n- 评测脚本能一键跑\n- 改了提示词能对比效果' },
+    { projectNumber: 9, title: '完整产品实战', category: '专项', difficulty: '高级', duration: '7天', prerequisites: ['全部'], deliverables: ['一个完整可用的智能体应用'], description: '综合运用所有知识，做一个完整的智能体产品。', content: '## 目标\n从零做一个完整的智能体应用：有工具、有记忆、有知识库、有监控。\n\n## 建议方向\n- 个人知识助手\n- 代码审查机器人\n- 邮件处理智能体\n- 数据查询助手\n\n## 验收\n- 功能完整可用\n- 有评测集能跑回归\n- 有监控能看trace\n- 错误不会崩，有兜底' },
   ];
 
   for (const p of projects) {
@@ -262,18 +814,16 @@ LangGraph 用**状态图**（State Graph）来建模智能体流程：
   }
 
   const resources = [
-    { title: 'LLM 智能体综述', category: '综述', type: '论文', stageNumber: 1, description: '智能体领域经典综述，介绍分类、架构和应用场景。' },
-    { title: 'LangGraph 官方教程', category: '框架', type: '官方文档', stageNumber: 5, description: 'LangGraph 状态图、checkpoint、human-in-the-loop 官方教程。' },
-    { title: 'CrewAI 官方文档', category: '框架', type: '官方文档', stageNumber: 6, description: '基于角色的多智能体框架，快速原型首选。' },
-    { title: 'MCP 官方文档', category: '工具调用', type: '官方文档', stageNumber: 3, description: 'Model Context Protocol 官方文档，2026年工具接入事实标准。' },
-    { title: 'OpenAI Agents SDK', category: '框架', type: '官方文档', stageNumber: 1, description: 'OpenAI 官方智能体框架，轻量快速。' },
-    { title: '提示工程最佳实践', category: '提示工程', type: '指南', stageNumber: 2, description: '主流模型厂商官方提示工程指南。' },
-    { title: 'RAG 评测指南', category: 'RAG', type: '指南', stageNumber: 4, description: '混合检索、重排序、RAG 质量评测最佳实践。' },
-    { title: 'Langfuse 官方文档', category: '评测', type: '官方文档', stageNumber: 7, description: '开源 LLM 可观测性平台，支持自托管和 OpenTelemetry。' },
-    { title: 'LangSmith 文档', category: '评测', type: '官方文档', stageNumber: 7, description: 'LangChain 官方可观测性和评测平台。' },
-    { title: 'ReAct 论文', category: '规划', type: '论文', stageNumber: 5, description: '推理与行动结合的经典论文。' },
-    { title: '多智能体系统综述', category: '多智能体', type: '论文', stageNumber: 6, description: '多智能体协作范式综述。' },
-    { title: 'FastMCP 快速入门', category: '工具调用', type: '教程', stageNumber: 3, description: '用 Python 快速开发 MCP Server 的教程。' },
+    { title: 'OpenAI API 快速开始', category: '官方文档', type: '教程', stageNumber: 2, description: 'OpenAI 官方API调用教程，最快跑通第一次调用。' },
+    { title: '提示工程最佳实践', category: '提示工程', type: '指南', stageNumber: 3, description: '主流模型厂商官方提示工程指南。' },
+    { title: '结构化输出指南', category: '提示工程', type: '指南', stageNumber: 3, description: '用JSON Schema约束模型输出格式。' },
+    { title: 'Function Calling 文档', category: '工具调用', type: '官方文档', stageNumber: 4, description: '主流模型函数调用接口说明。' },
+    { title: 'MCP 官方文档', category: 'MCP', type: '官方文档', stageNumber: 5, description: 'Model Context Protocol 官方文档。' },
+    { title: 'FastMCP 快速入门', category: 'MCP', type: '教程', stageNumber: 5, description: '用Python快速开发MCP Server。' },
+    { title: 'LangGraph 官方教程', category: '框架', type: '教程', stageNumber: 7, description: 'LangGraph 状态图、checkpoint、human-in-the-loop。' },
+    { title: 'Langfuse 文档', category: '评测', type: '官方文档', stageNumber: 7, description: '开源LLM可观测性平台，支持自托管。' },
+    { title: 'RAG 实战指南', category: 'RAG', type: '指南', stageNumber: 6, description: '从简单向量检索到生产级RAG的完整指南。' },
+    { title: 'ReAct 论文', category: '理论', type: '论文', stageNumber: 7, description: '推理与行动结合的经典论文。' },
   ];
   for (const r of resources) {
     const existing = await db.select().from(learningResources).where(eq(learningResources.title, r.title)).limit(1);
@@ -281,14 +831,14 @@ LangGraph 用**状态图**（State Graph）来建模智能体流程：
   }
 
   const exps = [
-    { expNumber: 1, title: '第一个 Hello Agent', category: '入门', difficulty: '简单', duration: '30分钟', description: '用最少代码跑通一个智能体循环。', content: '20行以内脚本，输入问题调用模型返回回答。' },
-    { expNumber: 2, title: '设计你的提示词', category: '提示工程', difficulty: '简单', duration: '1小时', description: '对比不同提示词的效果。', content: '同一任务测试3种提示词写法。' },
-    { expNumber: 3, title: '写第一个 MCP Server', category: 'MCP', difficulty: '中等', duration: '1.5小时', description: '用 FastMCP 写一个简单的工具服务。', content: '实现一个计算器 MCP Server，用 MCP Inspector 测试。' },
-    { expNumber: 4, title: '上下文窗口实验', category: '记忆', difficulty: '中等', duration: '1小时', description: '观察长对话中的遗忘现象。', content: '连续对话20轮观察何时"失忆"。' },
-    { expNumber: 5, title: 'LangGraph 第一个图', category: '规划', difficulty: '中等', duration: '2小时', description: '用 LangGraph 构建第一个有状态工作流。', content: '实现一个简单的调研→写作工作流，加 checkpoint。' },
-    { expNumber: 6, title: 'CrewAI 双角色对话', category: '多智能体', difficulty: '困难', duration: '2小时', description: '用 CrewAI 实现评审循环。', content: 'A写初稿B挑毛病，观察最终质量。' },
-    { expNumber: 7, title: '接入 Langfuse Trace', category: '评测', difficulty: '中等', duration: '1.5小时', description: '给你的智能体加上完整追踪。', content: '接入 Langfuse，查看每一步 LLM 调用和工具调用。' },
-    { expNumber: 8, title: '跑一个评测集', category: '评测', difficulty: '中等', duration: '1.5小时', description: '用固定测试集衡量智能体表现。', content: '10条用例，统计通过率。' },
+    { expNumber: 1, title: '第一次调API', category: '入门', difficulty: '简单', duration: '30分钟', description: '跑通第一次LLM调用。', content: '写10行代码调用模型API。' },
+    { expNumber: 2, title: 'Temperature 对比实验', category: '提示工程', difficulty: '简单', duration: '30分钟', description: '对比不同temperature的输出差异。', content: '同一问题跑5次，temperature 0 vs 1。' },
+    { expNumber: 3, title: '计算器工具', category: '工具调用', difficulty: '中等', duration: '1小时', description: '实现第一个Function Calling工具。', content: '实现计算器，测试数学问题。' },
+    { expNumber: 4, title: '第一个 MCP Server', category: 'MCP', difficulty: '中等', duration: '1.5小时', description: '用FastMCP写一个工具服务。', content: '写一个简单的MCP Server并用Inspector测试。' },
+    { expNumber: 5, title: '对话记忆实验', category: '记忆', difficulty: '中等', duration: '1小时', description: '观察长对话中的遗忘现象。', content: '连续对话20轮，观察何时开始忘事。' },
+    { expNumber: 6, title: '简单 RAG 实验', category: 'RAG', difficulty: '中等', duration: '2小时', description: '基于文档问答。', content: '上传文档，实现最简单的向量检索问答。' },
+    { expNumber: 7, title: 'LangGraph 第一个图', category: '工作流', difficulty: '困难', duration: '2小时', description: '构建一个有状态工作流。', content: '实现一个两步工作流，加checkpoint。' },
+    { expNumber: 8, title: '接入 Langfuse', category: '评测', difficulty: '中等', duration: '1小时', description: '给智能体加上追踪。', content: '接入Langfuse，查看完整trace。' },
   ];
   for (const e of exps) {
     const existing = await db.select().from(experiments).where(eq(experiments.expNumber, e.expNumber)).limit(1);

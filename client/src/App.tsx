@@ -1,5 +1,6 @@
 import { Routes, Route, Navigate } from 'react-router-dom';
 import Layout from './components/Layout';
+import RequireAuth from './components/RequireAuth';
 import Overview from './pages/Overview';
 import Stages from './pages/Stages';
 import Projects from './pages/Projects';
@@ -16,7 +17,7 @@ export default function App() {
   return (
     <Routes>
       <Route path="/login" element={<Login />} />
-      <Route path="/" element={<Layout />}>
+      <Route path="/" element={<RequireAuth><Layout /></RequireAuth>}>
         <Route index element={<Overview />} />
         <Route path="stages" element={<Stages />} />
         <Route path="stages/:id" element={<StageDetail />} />

@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../lib/auth';
 
@@ -8,8 +8,12 @@ export default function Login() {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
-  const { login, register } = useAuth();
+  const { login, register, user } = useAuth();
   const nav = useNavigate();
+
+  useEffect(() => {
+    if (user) nav('/');
+  }, [user]);
 
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();

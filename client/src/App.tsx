@@ -9,6 +9,8 @@ import Notes from './pages/Notes';
 import Settings from './pages/Settings';
 import About from './pages/About';
 import Login from './pages/Login';
+import StageDetail from './pages/StageDetail';
+import ProjectDetail from './pages/ProjectDetail';
 
 export default function App() {
   return (
@@ -17,7 +19,9 @@ export default function App() {
       <Route path="/" element={<Layout />}>
         <Route index element={<Overview />} />
         <Route path="stages" element={<Stages />} />
+        <Route path="stages/:id" element={<StageDetail />} />
         <Route path="projects" element={<Projects />} />
+        <Route path="projects/:id" element={<ProjectDetail />} />
         <Route path="resources" element={<Resources />} />
         <Route path="experiments" element={<Experiments />} />
         <Route path="notes" element={<Notes />} />

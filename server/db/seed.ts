@@ -7,11 +7,39 @@ import { users, learningStages, practiceProjects, learningResources, experiments
 async function seed() {
   console.log('开始种子数据初始化...');
 
+  // ===== 自动迁移：给旧表加新字段 =====
+  console.log('  检查数据库表结构...');
+  const pool = (db as any).session.client as { query: (sql: string) => Promise<any> };
+
+  // 检查并加 role 列
+  const roleCol = await pool.query(`
+    SELECT column_name FROM information_schema.columns 
+    WHERE table_name='app_user' AND column_name='role'
+  `);
+  if (roleCol.rows.length === 0) {
+    await pool.query(`ALTER TABLE app_user ADD COLUMN role VARCHAR(20) NOT NULL DEFAULT 'user'`);
+    console.log('  ✓ 已添加 role 列');
+  }
+
+  // 检查并加 banned 列
+  const bannedCol = await pool.query(`
+    SELECT column_name FROM information_schema.columns 
+    WHERE table_name='app_user' AND column_name='banned'
+  `);
+  if (bannedCol.rows.length === 0) {
+    await pool.query(`ALTER TABLE app_user ADD COLUMN banned BOOLEAN NOT NULL DEFAULT false`);
+    console.log('  ✓ 已添加 banned 列');
+  }
+
+  // ===== 确保 admin 账号是管理员 =====
   const adminExists = await db.select().from(users).where(eq(users.email, 'admin@example.com')).limit(1);
   if (adminExists.length === 0) {
     const passwordHash = await bcrypt.hash('admin123', 10);
     await db.insert(users).values({ email: 'admin@example.com', username: 'admin', passwordHash, role: 'admin' });
     console.log('  ✓ 创建默认管理员账号 admin / admin123');
+  } else if (adminExists[0].role !== 'admin') {
+    await db.update(users).set({ role: 'admin' }).where(eq(users.id, adminExists[0].id));
+    console.log('  ✓ 已将 admin 账号升级为管理员');
   }
 
   const stages = [

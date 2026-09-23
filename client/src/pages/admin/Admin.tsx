@@ -9,7 +9,7 @@ export default function Admin() {
     api.get('/admin/stats').then(r => setStats(r.data));
   }, []);
 
-  if (!stats) return <div className="p-6">加载中...</div>;
+  if (!stats) return <div>加载中...</div>;
 
   const cards = [
     { label: '用户总数', value: stats.users, icon: '👥' },
@@ -20,27 +20,31 @@ export default function Admin() {
   ];
 
   return (
-    <div className="p-6">
-      <h1 className="text-2xl font-bold mb-6">管理员后台</h1>
+    <div>
+      <div className="breadcrumb">工作台 <span>/</span> <span className="current">管理后台</span></div>
+      <div className="page-header">
+        <h2>管理后台</h2>
+        <p>平台数据概览与管理入口</p>
+      </div>
 
-      <div className="grid grid-cols-2 md:grid-cols-5 gap-4 mb-8">
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '16px', marginBottom: '32px' }}>
         {cards.map(c => (
-          <div key={c.label} className="bg-white rounded-lg p-4 shadow-sm">
-            <div className="text-3xl mb-2">{c.icon}</div>
-            <div className="text-2xl font-bold">{c.value}</div>
-            <div className="text-sm text-gray-500">{c.label}</div>
+          <div key={c.label} className="list-item" style={{ cursor: 'default' }}>
+            <div style={{ fontSize: '32px', marginBottom: '8px' }}>{c.icon}</div>
+            <div style={{ fontSize: '28px', fontWeight: '700', lineHeight: 1 }}>{c.value}</div>
+            <div style={{ fontSize: '13px', color: 'var(--text-secondary)', marginTop: '4px' }}>{c.label}</div>
           </div>
         ))}
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <Link to="/admin/users" className="bg-white rounded-lg p-6 shadow-sm hover:shadow-md transition">
-          <div className="text-xl font-semibold mb-2">用户管理</div>
-          <p className="text-gray-500 text-sm">查看所有用户，封禁或删除账号</p>
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
+        <Link to="/admin/users" className="list-item" style={{ display: 'block' }}>
+          <div style={{ fontSize: '18px', fontWeight: '600', marginBottom: '6px' }}>用户管理</div>
+          <div style={{ fontSize: '14px', color: 'var(--text-secondary)' }}>查看所有用户，封禁或删除账号</div>
         </Link>
-        <Link to="/admin/content" className="bg-white rounded-lg p-6 shadow-sm hover:shadow-md transition">
-          <div className="text-xl font-semibold mb-2">内容管理</div>
-          <p className="text-gray-500 text-sm">编辑课程模块和实践项目内容</p>
+        <Link to="/admin/content" className="list-item" style={{ display: 'block' }}>
+          <div style={{ fontSize: '18px', fontWeight: '600', marginBottom: '6px' }}>内容管理</div>
+          <div style={{ fontSize: '14px', color: 'var(--text-secondary)' }}>编辑课程模块和实践项目内容</div>
         </Link>
       </div>
     </div>

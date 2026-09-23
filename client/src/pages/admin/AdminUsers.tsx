@@ -25,50 +25,37 @@ export default function AdminUsers() {
   };
 
   return (
-    <div className="p-6">
-      <h1 className="text-2xl font-bold mb-6">用户管理</h1>
-      <div className="bg-white rounded-lg shadow-sm overflow-hidden">
-        <table className="w-full">
-          <thead className="bg-gray-50">
-            <tr>
-              <th className="text-left p-3 text-sm font-medium text-gray-500">邮箱</th>
-              <th className="text-left p-3 text-sm font-medium text-gray-500">用户名</th>
-              <th className="text-left p-3 text-sm font-medium text-gray-500">角色</th>
-              <th className="text-left p-3 text-sm font-medium text-gray-500">状态</th>
-              <th className="text-left p-3 text-sm font-medium text-gray-500">注册时间</th>
-              <th className="text-left p-3 text-sm font-medium text-gray-500">操作</th>
-            </tr>
-          </thead>
-          <tbody>
-            {users.map(u => (
-              <tr key={u.id} className="border-t">
-                <td className="p-3 text-sm">{u.email}</td>
-                <td className="p-3 text-sm">{u.username}</td>
-                <td className="p-3 text-sm">
-                  <span className={`px-2 py-1 rounded text-xs ${u.role === 'admin' ? 'bg-red-100 text-red-700' : 'bg-gray-100 text-gray-600'}`}>
-                    {u.role}
-                  </span>
-                </td>
-                <td className="p-3 text-sm">
-                  {u.banned ? <span className="text-red-600">已封禁</span> : <span className="text-green-600">正常</span>}
-                </td>
-                <td className="p-3 text-sm text-gray-500">{new Date(u.createdAt).toLocaleDateString()}</td>
-                <td className="p-3 text-sm">
-                  {u.role !== 'admin' && (
-                    <>
-                      {u.banned
-                        ? <button onClick={() => unban(u.id)} className="text-blue-600 mr-3">解封</button>
-                        : <button onClick={() => ban(u.id)} className="text-orange-600 mr-3">封禁</button>
-                      }
-                      <button onClick={() => del(u.id)} className="text-red-600">删除</button>
-                    </>
-                  )}
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+    <div>
+      <div className="breadcrumb">工作台 <span>/</span> <span className="current">用户管理</span></div>
+      <div className="page-header">
+        <h2>用户管理</h2>
+        <p>共 {users.length} 个用户</p>
       </div>
+
+      {users.map(u => (
+        <div key={u.id} className="list-item" style={{ cursor: 'default' }}>
+          <div className="num" style={{ fontSize: '18px' }}>👤</div>
+          <div className="info">
+            <div className="title">{u.username} <span style={{ fontSize: '13px', color: 'var(--text-secondary)', fontWeight: 'normal' }}>{u.email}</span></div>
+            <div className="desc">
+              <span className={`badge ${u.role === 'admin' ? 'badge-green' : 'badge-gray'}`}>{u.role}</span>
+              {' '}
+              <span className={`badge ${u.banned ? 'badge-gray' : 'badge-green'}`}>{u.banned ? '已封禁' : '正常'}</span>
+              {' '}
+              <span style={{ marginLeft: '8px' }}>注册于 {new Date(u.createdAt).toLocaleDateString()}</span>
+            </div>
+          </div>
+          {u.role !== 'admin' && (
+            <div style={{ display: 'flex', gap: '8px' }}>
+              {u.banned
+                ? <button className="check-btn" onClick={() => unban(u.id)}>解封</button>
+                : <button className="check-btn" onClick={() => ban(u.id)}>封禁</button>
+              }
+              <button className="check-btn" style={{ color: '#dc2626' }} onClick={() => del(u.id)}>删除</button>
+            </div>
+          )}
+        </div>
+      ))}
     </div>
   );
 }

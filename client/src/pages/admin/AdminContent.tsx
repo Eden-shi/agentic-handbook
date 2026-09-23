@@ -4,14 +4,20 @@ import api from '../../lib/api';
 export default function AdminContent() {
   const [stages, setStages] = useState<any[]>([]);
   const [editing, setEditing] = useState<any>(null);
+  const [isNew, setIsNew] = useState(false);
 
   const load = () => api.get('/admin/stages').then(r => setStages(r.data));
 
   useEffect(() => { load(); }, []);
 
   const save = async () => {
-    await api.put(`/admin/stages/${editing.id}`, editing);
+    if (isNew) {
+      await api.post('/admin/stages', editing);
+    } else {
+      await api.put(`/admin/stages/${editing.id}`, editing);
+    }
     setEditing(null);
+    setIsNew(false);
     load();
   };
 
@@ -21,48 +27,50 @@ export default function AdminContent() {
     load();
   };
 
+  const newStage = () => {
+    setEditing({ stageNumber: stages.length + 1, title: '', subtitle: '', description: '', content: '', duration: '' });
+    setIsNew(true);
+  };
+
   if (editing) {
+    const inputStyle = {
+      width: '100%', padding: '10px 14px', border: '1px solid var(--border)',
+      borderRadius: '10px', fontSize: '14px', outline: 'none',
+    };
     return (
-      <div className="p-6">
-        <h1 className="text-2xl font-bold mb-6">编辑模块</h1>
-        <div className="space-y-4 max-w-3xl">
-          <div>
-            <label className="block text-sm font-medium mb-1">标题</label>
-            <input
-              className="w-full border rounded p-2"
-              value={editing.title}
-              onChange={e => setEditing({ ...editing, title: e.target.value })}
-            />
+      <div>
+        <div className="breadcrumb">工作台 <span>/</span> <span onClick={() => setEditing(null)} style={{ cursor: 'pointer' }}>内容管理</span> <span>/</span> <span className="current">{isNew ? '新增模块' : '编辑模块'}</span></div>
+        <div className="page-header">
+          <h2>{isNew ? '新增课程模块' : '编辑课程模块'}</h2>
+        </div>
+        <div className="card" style={{ maxWidth: '800px' }}>
+          <div style={{ marginBottom: '16px' }}>
+            <label style={{ display: 'block', fontSize: '13px', fontWeight: '600', marginBottom: '6px' }}>模块序号</label>
+            <input style={inputStyle} type="number" value={editing.stageNumber} onChange={e => setEditing({ ...editing, stageNumber: parseInt(e.target.value) })} />
           </div>
-          <div>
-            <label className="block text-sm font-medium mb-1">副标题</label>
-            <input
-              className="w-full border rounded p-2"
-              value={editing.subtitle || ''}
-              onChange={e => setEditing({ ...editing, subtitle: e.target.value })}
-            />
+          <div style={{ marginBottom: '16px' }}>
+            <label style={{ display: 'block', fontSize: '13px', fontWeight: '600', marginBottom: '6px' }}>标题</label>
+            <input style={inputStyle} value={editing.title} onChange={e => setEditing({ ...editing, title: e.target.value })} />
           </div>
-          <div>
-            <label className="block text-sm font-medium mb-1">描述</label>
-            <textarea
-              className="w-full border rounded p-2"
-              rows={2}
-              value={editing.description || ''}
-              onChange={e => setEditing({ ...editing, description: e.target.value })}
-            />
+          <div style={{ marginBottom: '16px' }}>
+            <label style={{ display: 'block', fontSize: '13px', fontWeight: '600', marginBottom: '6px' }}>副标题</label>
+            <input style={inputStyle} value={editing.subtitle || ''} onChange={e => setEditing({ ...editing, subtitle: e.target.value })} />
           </div>
-          <div>
-            <label className="block text-sm font-medium mb-1">内容 (Markdown)</label>
-            <textarea
-              className="w-full border rounded p-2 font-mono text-sm"
-              rows={20}
-              value={editing.content || ''}
-              onChange={e => setEditing({ ...editing, content: e.target.value })}
-            />
+          <div style={{ marginBottom: '16px' }}>
+            <label style={{ display: 'block', fontSize: '13px', fontWeight: '600', marginBottom: '6px' }}>描述</label>
+            <textarea style={{ ...inputStyle, minHeight: '60px' }} value={editing.description || ''} onChange={e => setEditing({ ...editing, description: e.target.value })} />
           </div>
-          <div className="flex gap-2">
-            <button onClick={save} className="bg-blue-600 text-white px-4 py-2 rounded">保存</button>
-            <button onClick={() => setEditing(null)} className="bg-gray-200 px-4 py-2 rounded">取消</button>
+          <div style={{ marginBottom: '16px' }}>
+            <label style={{ display: 'block', fontSize: '13px', fontWeight: '600', marginBottom: '6px' }}>时长</label>
+            <input style={inputStyle} value={editing.duration || ''} onChange={e => setEditing({ ...editing, duration: e.target.value })} />
+          </div>
+          <div style={{ marginBottom: '24px' }}>
+            <label style={{ display: 'block', fontSize: '13px', fontWeight: '600', marginBottom: '6px' }}>内容 (Markdown)</label>
+            <textarea style={{ ...inputStyle, minHeight: '400px', fontFamily: 'monospace', fontSize: '13px' }} value={editing.content || ''} onChange={e => setEditing({ ...editing, content: e.target.value })} />
+          </div>
+          <div style={{ display: 'flex', gap: '12px' }}>
+            <button className="check-btn done" onClick={save}>保存</button>
+            <button className="check-btn" onClick={() => { setEditing(null); setIsNew(false); }}>取消</button>
           </div>
         </div>
       </div>
@@ -70,33 +78,29 @@ export default function AdminContent() {
   }
 
   return (
-    <div className="p-6">
-      <h1 className="text-2xl font-bold mb-6">内容管理 - 课程模块</h1>
-      <div className="bg-white rounded-lg shadow-sm overflow-hidden">
-        <table className="w-full">
-          <thead className="bg-gray-50">
-            <tr>
-              <th className="text-left p-3 text-sm font-medium text-gray-500">序号</th>
-              <th className="text-left p-3 text-sm font-medium text-gray-500">标题</th>
-              <th className="text-left p-3 text-sm font-medium text-gray-500">时长</th>
-              <th className="text-left p-3 text-sm font-medium text-gray-500">操作</th>
-            </tr>
-          </thead>
-          <tbody>
-            {stages.map(s => (
-              <tr key={s.id} className="border-t">
-                <td className="p-3 text-sm">{s.stageNumber}</td>
-                <td className="p-3 text-sm">{s.title}</td>
-                <td className="p-3 text-sm text-gray-500">{s.duration}</td>
-                <td className="p-3 text-sm">
-                  <button onClick={() => setEditing(s)} className="text-blue-600 mr-3">编辑</button>
-                  <button onClick={() => del(s.id)} className="text-red-600">删除</button>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+    <div>
+      <div className="breadcrumb">工作台 <span>/</span> <span className="current">内容管理</span></div>
+      <div className="page-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end' }}>
+        <div>
+          <h2>内容管理 - 课程模块</h2>
+          <p>共 {stages.length} 个模块</p>
+        </div>
+        <button className="check-btn done" onClick={newStage}>+ 新增模块</button>
       </div>
+
+      {stages.map(s => (
+        <div key={s.id} className="list-item">
+          <div className="num">{String(s.stageNumber).padStart(2, '0')}</div>
+          <div className="info">
+            <div className="title">{s.title}</div>
+            <div className="desc">{s.subtitle} · {s.duration}</div>
+          </div>
+          <div style={{ display: 'flex', gap: '8px' }}>
+            <button className="check-btn" onClick={() => setEditing(s)}>编辑</button>
+            <button className="check-btn" style={{ color: '#dc2626' }} onClick={() => del(s.id)}>删除</button>
+          </div>
+        </div>
+      ))}
     </div>
   );
 }

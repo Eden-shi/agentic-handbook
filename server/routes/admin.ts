@@ -48,6 +48,19 @@ router.put('/users/:id/ban', async (req: AuthRequest, res: Response) => {
   res.json(user);
 });
 
+router.put('/users/:id/role', async (req: AuthRequest, res: Response) => {
+  const { role } = req.body;
+  if (!['user', 'admin'].includes(role)) {
+    return res.status(400).json({ error: '角色只能是 user 或 admin' });
+  }
+  const [user] = await db.update(users)
+    .set({ role })
+    .where(eq(users.id, req.params.id as any))
+    .returning();
+  if (!user) return res.status(404).json({ error: '用户不存在' });
+  res.json(user);
+});
+
 router.put('/users/:id/unban', async (req: AuthRequest, res: Response) => {
   const [user] = await db.update(users)
     .set({ banned: false })

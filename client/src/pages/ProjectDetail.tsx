@@ -1,5 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
+import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
 import api from '../lib/api';
 import { useAuth } from '../lib/auth';
 
@@ -43,7 +45,9 @@ export default function ProjectDetail() {
         <p>{project.category} · {project.difficulty} · 预计 {project.duration}</p>
       </div>
       <div className="card" style={{ fontSize: 15, lineHeight: 1.9 }}>
-        <div style={{ whiteSpace: 'pre-wrap' }}>{project.content}</div>
+        <div className="markdown-body">
+          <ReactMarkdown remarkPlugins={[remarkGfm]}>{project.content}</ReactMarkdown>
+        </div>
         {project.prerequisites?.length > 0 && (
           <div style={{ marginTop: 20, paddingTop: 16, borderTop: '1px solid var(--border)' }}>
             <strong>前置：</strong>

@@ -113,7 +113,7 @@ python --version
 ### 3. 注册模型API Key
 你需要一个大模型API Key。推荐两个：
 - **OpenAI**：去 platform.openai.com 注册，充5美元就够学很久了
-- **Anthropic Claude**：去 console.anthropic.com 注册
+- **Anthropic Claude**：去 platform.claude.com（原 console.anthropic.com，会自动跳转）注册
 
 把API Key复制下来，存好，后面要用。
 
@@ -151,6 +151,15 @@ python hello.py
 \`\`\`
 
 如果你看到模型输出了介绍自己的文字，恭喜，你的环境装好了。
+
+## 关于模型版本（重要，避免学过时内容）
+
+本手册教学代码统一用 \`gpt-4o\`，原因是它稳定、文档多、价格适中，适合反复练习。但你要清楚它**不是最新旗舰**：
+
+- 截至2026年9月，OpenAI最新一代是 **GPT-6 系列**（GPT-6 Sol 旗舰、GPT-6 Luna 轻量），中间还有 GPT-5.x 系列
+- 学习时用 gpt-4o 完全没问题，核心API（chat.completions、tools、response_format）在各代之间通用
+- 做正式产品时，再按需求和预算选最新模型（最新价格见第10章）
+- 模型迭代很快，以官方文档的模型列表为准，不要把某个具体型号当成"永远最新"
 
 ## 三个角色的消息是什么意思
 
@@ -613,8 +622,12 @@ RAG（检索增强生成）就是解决这个问题的。思路很简单：
 如果你切得太碎，每块只有一两句话，又没上下文。
 
 ### 常用策略：固定大小切块
+\`\`\`bash
+pip install -U langchain-text-splitters
+\`\`\`
 \`\`\`python
-from langchain.text_splitter import RecursiveCharacterTextSplitter
+# 注意：新版从独立包导入，旧的 langchain.text_splitter 路径已移除
+from langchain_text_splitters import RecursiveCharacterTextSplitter
 
 splitter = RecursiveCharacterTextSplitter(
     chunk_size=500,      # 每块大概500个字符
@@ -830,15 +843,16 @@ MCP分三部分：
       "args": ["-y", "@modelcontextprotocol/server-filesystem", "/Users/you/Documents"]
     },
     "github": {
-      "command": "npx",
-      "args": ["-y", "@modelcontextprotocol/server-github"],
-      "env": {
-        "GITHUB_TOKEN": "你的GitHub Token"
+      "url": "https://api.githubcopilot.com/mcp/",
+      "headers": {
+        "Authorization": "Bearer 你的GitHub Token"
       }
     }
   }
 }
 \`\`
+
+> 注意：旧的npm包 \`@modelcontextprotocol/server-github\` 已废弃归档，不要再用。现在GitHub官方MCP server是 \`github/github-mcp-server\`：图省事就用上面的远程URL；要本地自托管就用Docker跑 \`ghcr.io/github/github-mcp-server\`。filesystem包仍是官方在维护的一方server，可放心用。
 
 配置完重启Claude Desktop，它就自动连上这两个MCP Server了。你跟它说"帮我看看我Documents文件夹里有什么"，它就能自己去读文件。
 
@@ -846,10 +860,14 @@ MCP分三部分：
 
 如果你想做一个自己的工具，也可以按MCP标准写。
 
-用Python的话，用 mcp SDK：
+用Python的话，推荐用社区主流的FastMCP（独立包，功能比官方SDK内置版更全）：
+
+\`\`\`bash
+pip install fastmcp
+\`\`
 
 \`\`\`python
-from mcp.server.fastmcp import FastMCP
+from fastmcp import FastMCP
 
 mcp = FastMCP("我的工具")
 

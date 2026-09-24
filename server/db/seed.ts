@@ -52,7 +52,9 @@ async function seed() {
       topics: ['智能体 vs 普通聊天机器人', '装Python和VS Code', '注册模型API Key', '第一次API调用', '理解LLM的本质'],
       resources: ['OpenAI API快速开始', 'Anthropic Claude API文档'],
       description: '完全零基础。先搞懂智能体到底是什么、和ChatGPT聊天有什么区别，再把开发环境装好，跑通第一次API调用。',
-      content: `## 为什么要学这个模块
+      content: `![AI智能体概念图](https://images.unsplash.com/photo-1677442136019-21780ecad995?w=1200&h=400&fit=crop)
+
+## 为什么要学这个模块
 
 很多人一上来就想学LangChain、LangGraph，结果学了半个月还是不知道自己在干嘛。这个模块就是给你打地基的——你得先搞清楚"智能体到底是什么"、"LLM到底是怎么工作的"，后面学框架才不会晕。
 
@@ -193,7 +195,9 @@ python hello.py
       topics: ['消息格式详解', '温度等参数', 'Few-shot示例', '结构化输出', 'ReAct范式'],
       resources: ['OpenAI Prompt Engineering Guide', 'Anthropic Prompt Engineering'],
       description: '从"AI答得好不好看运气"到"我写的提示词就是能稳定出好结果"。',
-      content: `## 为什么提示词工程这么重要
+      content: `![提示词工程](https://images.unsplash.com/photo-1555255707-c07966088b7b?w=1200&h=400&fit=crop)
+
+## 为什么提示词工程这么重要
 
 很多新手有个误区：觉得模型不行，换个更贵的模型就好了。其实90%的情况，不是模型不行，是你提示词写得烂。
 
@@ -367,7 +371,9 @@ ReAct = Reasoning + Acting（推理 + 行动）。
       topics: ['Function Calling原理', '工具定义', '调用循环', '错误处理', '设计好工具的原则'],
       resources: ['OpenAI Function Calling Guide', 'Anthropic Tool Use文档'],
       description: '从"只会聊天"到"能调用工具干活"——这是从聊天机器人到智能体的关键一步。',
-      content: `## 为什么需要工具调用
+      content: `![工具调用](https://images.unsplash.com/photo-1518770660439-4636190af475?w=1200&h=400&fit=crop)
+
+## 为什么需要工具调用
 
 LLM有两个天生的缺陷：
 1. **不知道实时信息**：它的训练数据有截止日期，不知道今天天气、不知道你数据库里有什么。
@@ -568,7 +574,9 @@ for step in range(max_steps):
       topics: ['为什么需要RAG', '向量数据库', '文档切块', '嵌入模型', '检索与重排序'],
       resources: ['LangChain RAG Tutorial', 'ChromaDB文档', 'RAG最佳实践'],
       description: '解决"LLM不知道你私有数据"的问题。学完你能做一个能回答你文档问题的知识库系统。',
-      content: `## 为什么需要RAG
+      content: `![RAG知识库](https://images.unsplash.com/photo-1456513080510-7bf3a84b82f8?w=1200&h=400&fit=crop)
+
+## 为什么需要RAG
 
 LLM有个天生的问题：它的训练数据是有截止日期的，而且它不知道你公司的内部文档、你自己的笔记、你上传的PDF。
 
@@ -759,7 +767,9 @@ print(answer("年假有几天？"))
       topics: ['MCP是什么', 'MCP架构', 'MCP Server', '常用MCP工具', 'MCP安全'],
       resources: ['MCP官方文档', 'MCP Server列表'],
       description: 'Model Context Protocol是2025年出来的标准协议，2026年已经成为AI接外部工具的事实标准。',
-      content: `## 为什么要有MCP
+      content: `![MCP协议](https://images.unsplash.com/photo-1558494949-ef010cbdcc31?w=1200&h=400&fit=crop)
+
+## 为什么要有MCP
 
 你之前学的Function Calling，每个工具都要你自己写函数定义、自己写执行逻辑。
 
@@ -889,7 +899,9 @@ MCP给智能体开了很多权限，你得注意安全：
       topics: ['为什么智能体会忘事', '短期记忆', '长期记忆', '上下文压缩', '记忆管理策略'],
       resources: ['LLM Context Engineering指南', '记忆系统最佳实践'],
       description: '上下文窗口是智能体最宝贵的资源。学会怎么管理记忆，直接决定你的智能体能用多久。',
-      content: `## 为什么智能体会忘事
+      content: `![记忆系统](https://images.unsplash.com/photo-1481627834876-b7833e8f5570?w=1200&h=400&fit=crop)
+
+## 为什么智能体会忘事
 
 LLM有个限制：上下文窗口（Context Window）。就是它一次能"看到"的Token数量。
 
@@ -1021,7 +1033,9 @@ def compress_messages(messages):
       topics: ['为什么需要状态机', 'LangGraph核心概念', '节点和边', '条件路由', 'Checkpoint断点恢复', 'Human-in-the-loop'],
       resources: ['LangGraph官方文档', 'LangGraph Tutorial'],
       description: '从"一个循环跑到底"到"根据情况走不同分支"——这是做复杂智能体的核心技能。',
-      content: `## 为什么需要工作流编排
+      content: `![工作流编排](https://images.unsplash.com/photo-1531403009284-440f080d1e12?w=1200&h=400&fit=crop)
+
+## 为什么需要工作流编排
 
 你之前写的智能体都是一个while循环：一直调工具、一直跑，直到结束。
 
@@ -1202,7 +1216,9 @@ app.invoke({"approval": "continue"}, config)
       topics: ['什么时候需要多智能体', '协作模式', 'CrewAI/AutoGen', '角色设计', '多智能体调试'],
       resources: ['CrewAI官方文档', 'AutoGen教程', 'Multi-agent patterns'],
       description: '一个智能体干所有事，不如让多个专家分工合作。但多智能体不是银弹，要知道什么时候该用什么时候不该用。',
-      content: `## 什么时候该用多智能体
+      content: `![多智能体协作](https://images.unsplash.com/photo-1522071820081-009f0129c71c?w=1200&h=400&fit=crop)
+
+## 什么时候该用多智能体
 
 先说清楚：**80%的场景，单智能体+工具就够了，不需要多智能体。**
 
@@ -1336,7 +1352,9 @@ backstory不是写小说，是告诉这个智能体"你擅长什么、你做事�
       topics: ['为什么需要可观测性', 'Trace追踪', 'Langfuse接入', '评测集构建', 'LLM-as-Judge'],
       resources: ['Langfuse官方文档', 'RAGAS评测框架', 'LLM Eval指南'],
       description: '智能体上线后，你不能只靠用户反馈才知道它好不好。你得能看到每一步的trace，能跑自动化评测，能量化它的进步。',
-      content: `## 为什么需要可观测性
+      content: `![可观测性监控](https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=1200&h=400&fit=crop)
+
+## 为什么需要可观测性
 
 传统软件出了问题，你看日志就知道哪里错了。
 智能体出了问题，你看日志根本没用——因为它的"思考过程"是黑盒，你不知道它为什么调这个工具、为什么输出这个结果。
@@ -1483,7 +1501,9 @@ def evaluate(question, expected, actual):
       topics: ['三层护栏架构', 'Prompt Injection防护', '成本优化', '模型路由', '部署上线'],
       resources: ['LLM生产最佳实践', 'AI安全指南', 'LLM成本优化'],
       description: 'Demo和生产是两回事。这个模块教你怎么把智能体真正上线，不出事、不烧钱。',
-      content: `## Demo和生产的区别
+      content: `![生产部署](https://images.unsplash.com/photo-1667372393119-3d4c48d07fc9?w=1200&h=400&fit=crop)
+
+## Demo和生产的区别
 
 你在本地跑通了智能体，不代表它能上线。生产环境要面对：
 - 用户输入乱七八糟，什么都有

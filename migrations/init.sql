@@ -65,7 +65,7 @@ CREATE TABLE IF NOT EXISTS user_progress (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   user_id UUID NOT NULL REFERENCES app_user(id) ON DELETE CASCADE,
   item_type VARCHAR(50) NOT NULL,
-  item_id UUID NOT NULL,
+  item_id VARCHAR(100) NOT NULL,
   is_completed BOOLEAN NOT NULL DEFAULT false,
   completed_at TIMESTAMPTZ,
   created_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -78,7 +78,7 @@ CREATE TABLE IF NOT EXISTS learning_note (
   title VARCHAR(255) NOT NULL,
   content TEXT NOT NULL,
   related_type VARCHAR(50),
-  related_id UUID,
+  related_id VARCHAR(100),
   related_title VARCHAR(255),
   created_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
   updated_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP

@@ -39,11 +39,20 @@ router.get('/users', async (_req, res: Response) => {
   res.json(allUsers);
 });
 
+const publicUser = {
+  id: users.id,
+  email: users.email,
+  username: users.username,
+  role: users.role,
+  banned: users.banned,
+  createdAt: users.createdAt,
+};
+
 router.put('/users/:id/ban', async (req: AuthRequest, res: Response) => {
   const [user] = await db.update(users)
     .set({ banned: true })
     .where(eq(users.id, req.params.id as any))
-    .returning();
+    .returning(publicUser);
   if (!user) return res.status(404).json({ error: '用户不存在' });
   res.json(user);
 });
@@ -56,7 +65,7 @@ router.put('/users/:id/role', async (req: AuthRequest, res: Response) => {
   const [user] = await db.update(users)
     .set({ role })
     .where(eq(users.id, req.params.id as any))
-    .returning();
+    .returning(publicUser);
   if (!user) return res.status(404).json({ error: '用户不存在' });
   res.json(user);
 });
@@ -65,7 +74,7 @@ router.put('/users/:id/unban', async (req: AuthRequest, res: Response) => {
   const [user] = await db.update(users)
     .set({ banned: false })
     .where(eq(users.id, req.params.id as any))
-    .returning();
+    .returning(publicUser);
   if (!user) return res.status(404).json({ error: '用户不存在' });
   res.json(user);
 });

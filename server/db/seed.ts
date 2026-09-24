@@ -1304,6 +1304,76 @@ result = crew.kickoff(inputs={"topic": "AI智能体"})
 print(result)
 \`\`\`
 
+## 用LangGraph做Supervisor模式（生产推荐）
+
+CrewAI简单，但生产环境控制力最强的是LangGraph的Supervisor模式。一个主管统一调度，专员只干活不互相沟通。
+
+\`\`\`python
+from langgraph.graph import StateGraph, START, END
+from langgraph.graph.message import add_messages
+from langchain_openai import ChatOpenAI
+from langchain_core.tools import tool
+from typing import TypedDict, Annotated, Literal
+import json
+
+@tool
+def search_web(query: str):
+    """搜索资料。"""
+    return "2025年AI智能体市场快速增长，主要应用于客服、编程、数据分析。"
+
+@tool
+def write_report(sections: str):
+    """撰写报告。"""
+    return f"报告已生成：{sections}"
+
+class TeamState(TypedDict):
+    messages: Annotated[list, add_messages]
+    next_step: str
+
+# 主管节点：决定派给谁
+def supervisor(state):
+    resp = ChatOpenAI(model="gpt-4o").invoke([
+        ("system", '你是主管，输出JSON：{"next": "researcher"或"writer"或"finish"}'),
+        *state["messages"]
+    ])
+    return {"next_step": json.loads(resp.content)["next"]}
+
+# 研究员节点
+def researcher(state):
+    llm = ChatOpenAI(model="gpt-4o").bind_tools([search_web])
+    return {"messages": [llm.invoke(state["messages"])]}
+
+# 写手节点
+def writer(state):
+    llm = ChatOpenAI(model="gpt-4o").bind_tools([write_report])
+    return {"messages": [llm.invoke(state["messages"])]}
+
+def route(state) -> Literal["researcher", "writer", "__end__"]:
+    return {"researcher": "researcher", "writer": "writer"}.get(state["next_step"], END)
+
+builder = StateGraph(TeamState)
+builder.add_node("supervisor", supervisor)
+builder.add_node("researcher", researcher)
+builder.add_node("writer", writer)
+builder.add_edge(START, "supervisor")
+builder.add_conditional_edges("supervisor", route)
+builder.add_edge("researcher", "supervisor")
+builder.add_edge("writer", "supervisor")
+
+graph = builder.compile()
+result = graph.invoke({"messages": [("user", "写一份AI市场调研报告")], "next_step": ""})
+print(result["messages"][-1].content)
+\`\`\`
+
+## A2A协议：智能体之间的标准通信（2025新趋势）
+
+2025年Google推出了A2A（Agent2Agent）协议，专门解决智能体之间的通信问题。
+
+- **MCP**：解决智能体怎么连工具和数据源（智能体 ↔ 工具）
+- **A2A**：解决智能体怎么和其他智能体协作（智能体 ↔ 智能体）
+
+两者是互补关系。A2A让不同框架、不同厂商开发的智能体也能互相发现、分配任务、交换结果。
+
 ## 怎么设计好角色
 
 多智能体好不好用，关键在角色设计：
@@ -1413,6 +1483,35 @@ response = client.chat.completions.create(
 \`\`\`
 
 就这么简单。现在你去Langfuse后台，就能看到这次调用的完整Trace了。
+
+## LangSmith：LangChain生态的一体化平台
+
+除了Langfuse，LangChain官方的LangSmith也是主流选择，和LangGraph配合最好。
+
+\`\`\`python
+import os
+os.environ["LANGSMITH_TRACING"] = "true"
+os.environ["LANGSMITH_API_KEY"] = "lsv2_xxx"
+os.environ["LANGSMITH_PROJECT"] = "my-agent"
+# 之后所有LangChain/LangGraph调用自动被追踪，不用改业务代码
+\`\`\`
+
+LangSmith的核心能力：
+1. **Trace树**：完整看到每个节点、工具调用、LLM请求的输入输出
+2. **Dataset数据集**：测试用例存成数据集，一键批量跑
+3. **自动评估器**：LLM-as-Judge自动打分
+4. **人工标注队列**：业务专家审核标注
+5. **Prompt版本管理**：每次改Prompt都有版本，能对比效果
+
+### LangSmith vs Langfuse怎么选
+
+| 对比项 | LangSmith | Langfuse |
+|--------|-----------|----------|
+| 开源 | 否 | 是 |
+| 自托管 | 不支持 | 支持 |
+| Trace追踪 | 强 | 强 |
+| 自动评测 | 强 | 有 |
+| 适合场景 | LangChain生态、图省事 | 数据敏感、要自己掌控 |
 
 ## 怎么看Trace
 
@@ -1613,8 +1712,11 @@ def choose_model(question):
 
 80%的请求用小模型就够了，成本直接降80%。
 
-### 2. 语义缓存
-相同的问题不要重复调LLM，直接返回之前的结果。
+### 2. Prompt Caching（提示词缓存）
+OpenAI和Anthropic都支持：重复的System Prompt和长上下文，第二次调用只收25%费用。System Prompt很长、多轮对话场景能省一半以上输入成本。
+
+### 3. 语义缓存
+相同或高度相似的问题不要重复调LLM，直接返回缓存结果。
 
 \`\`\`python
 from langfuse import Langfuse
@@ -1631,14 +1733,28 @@ def cached_query(question):
     return answer
 \`\`
 
-### 3. 限制上下文长度
+### 4. 限制上下文长度
 上下文越长，Token越贵。
 - 不要把所有历史对话都塞进去
 - 检索的时候少塞几段文档
 - 用摘要代替长对话历史
 
-### 4. 批量处理
-如果有很多请求要处理，用批量API，价格便宜一半。
+### 5. 批量处理
+不要求实时的任务（夜间批量处理文档），用Batch API，价格便宜一半。
+
+## 上线检查清单
+
+上线前逐项确认：
+- 所有输入有长度限制和清洗
+- 危险操作有人工审批节点
+- 配置了限流和Token配额
+- 最大步数限制已设置
+- 错误信息不会把堆栈或密钥返回给用户
+- 有完整日志和链路追踪
+- 成本告警已设置（账单超阈值通知）
+- 测试用例覆盖正常、边界、恶意输入
+- 数据库有备份
+- 有降级方案（LLM服务挂了怎么办）
 
 ## 部署上线
 

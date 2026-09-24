@@ -17,7 +17,7 @@ export default function Overview() {
     }
   }, [user]);
 
-  const stagePct = (stageDone / 7) * 100;
+  const stagePct = (stageDone / 10) * 100;
   const projPct = (projDone / 9) * 100;
 
   return (
@@ -25,13 +25,13 @@ export default function Overview() {
       <div className="breadcrumb">工作台 <span>/</span> <span className="current">学习总览</span></div>
       <div className="hero">
         <h1>从理解原理，到构建智能体。</h1>
-        <p>先沿七个基础阶段建立理解，再选择应用实践路线，用可验收的项目成果巩固所学。</p>
+        <p>先沿十个基础阶段建立理解，再选择应用实践路线，用可验收的项目成果巩固所学。</p>
       </div>
 
       <div className="card">
         <div className="card-label">学习方法</div>
         <h2>这本手册，怎么学？</h2>
-        <p>初次学习先按基础阶段 00–06 推进，再进入应用实践路线；已有基础可直接选实践目标，遇到知识缺口再补对应阶段。专项按需选择，不必全部学完。</p>
+        <p>初次学习先按基础阶段 01–10 推进，再进入应用实践路线；已有基础可直接选实践目标，遇到知识缺口再补对应阶段。专项按需选择，不必全部学完。</p>
         <div className="steps-grid">
           <div>
             <div className="step-num">01</div>
@@ -54,7 +54,7 @@ export default function Overview() {
       <div className="progress-grid">
         <div className="progress-card">
           <h3>基础学习进度</h3>
-          <div className="progress-number">{stageDone} <span className="total">/ 7</span></div>
+          <div className="progress-number">{stageDone} <span className="total">/ 10</span></div>
           <div className="progress-label">已完成基础阶段</div>
           <div className="progress-bar"><div className="progress-bar-fill" style={{ width: `${stagePct}%` }} /></div>
           <div className="progress-hint">完成阅读、练习与复盘后，手动标记阶段完成。</div>

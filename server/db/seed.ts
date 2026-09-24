@@ -1670,18 +1670,965 @@ CMD ["python", "main.py"]
   }
 
   const projects = [
-    // 初级项目
-    { projectNumber: 1, title: '第一个LLM对话程序', category: '初级', difficulty: '入门', duration: '半天', prerequisites: ['模块1'], deliverables: ['跑通API调用'], description: '最简单的入门项目：写一个程序调用LLM聊天。', content: '## 目标\n跑通第一次API调用。\n## 验收\n- 程序能运行并输出模型回复\n- 能解释system和user消息的区别' },
-    { projectNumber: 2, title: '提示词实验室', category: '初级', difficulty: '入门', duration: '1天', prerequisites: ['模块2'], deliverables: ['结构化输出Demo'], description: '练习写提示词，掌握结构化输出。', content: '## 目标\n让模型输出固定格式的JSON。\n## 验收\n- 输出始终是合法JSON\n- 分类准确率满意' },
-    { projectNumber: 3, title: '计算器智能体', category: '初级', difficulty: '中级', duration: '2天', prerequisites: ['模块3'], deliverables: ['第一个工具调用循环'], description: '让智能体遇到数学问题时调用计算器工具。', content: '## 目标\n实现Function Calling。\n## 验收\n- 模型能正确决定什么时候调计算器\n- 大数字计算不会出错' },
-    // 中级项目
-    { projectNumber: 4, title: '带记忆的聊天助手', category: '中级', difficulty: '中级', duration: '2天', prerequisites: ['模块6'], deliverables: ['对话记忆功能'], description: '做一个能记住多轮对话的聊天助手。', content: '## 目标\n实现多轮对话记忆。\n## 验收\n- 对话20轮后还记得早期信息\n- 上下文不会爆' },
-    { projectNumber: 5, title: 'RAG文档问答', category: '中级', difficulty: '中级', duration: '3天', prerequisites: ['模块4'], deliverables: ['知识库问答系统'], description: '基于RAG做一个能回答你文档问题的助手。', content: '## 目标\n上传文档，做RAG问答。\n## 验收\n- 文档内问题回答准确\n- 文档外问题会说不知道' },
-    { projectNumber: 6, title: 'LangGraph工作流', category: '中级', difficulty: '高级', duration: '4天', prerequisites: ['模块7'], deliverables: ['有状态工作流', '断点恢复'], description: '用LangGraph构建一个多步骤工作流。', content: '## 目标\n实现一个调研→写作工作流。\n## 验收\n- 流程能完整跑完\n- 支持checkpoint恢复' },
-    // 高级项目
-    { projectNumber: 7, title: '多智能体写作团队', category: '高级', difficulty: '高级', duration: '5天', prerequisites: ['模块8'], deliverables: ['多智能体协作Demo'], description: '用CrewAI搭一个写作团队：研究员→撰稿人→审稿人。', content: '## 目标\n多智能体协作完成一篇文章。\n## 验收\n- 三个角色各司其职\n- 最终文章质量比单智能体好' },
-    { projectNumber: 8, title: '可观测性接入', category: '高级', difficulty: '高级', duration: '3天', prerequisites: ['模块9'], deliverables: ['完整Trace', '自动化评测集'], description: '给智能体接入Langfuse，建自动化评测。', content: '## 目标\n完整接入可观测性。\n## 验收\n- 每一步都有trace\n- 评测集一键跑' },
-    { projectNumber: 9, title: '生产级智能体综合项目', category: '高级', difficulty: '专家', duration: '14天', prerequisites: ['全部'], deliverables: ['完整可上线的智能体'], description: '综合运用所有知识，做一个生产级智能体应用。', content: '## 目标\n从零做一个完整的生产级智能体。\n## 验收\n- 有监控和评测\n- 有成本优化\n- 有安全防护' },
+    // ===== 初级项目 =====
+    {
+      projectNumber: 1,
+      title: '第一个LLM对话程序',
+      category: '初级',
+      difficulty: '入门',
+      duration: '半天',
+      prerequisites: ['模块1'],
+      deliverables: ['跑通API调用', '能解释三种消息角色'],
+      description: '最简单的入门项目：写一个程序调用LLM聊天，理解API调用的基本流程。',
+      content: `## 项目背景
+
+这是你的第一个AI编程项目。不需要任何复杂的东西，就是把模块1学的API调用真正写出来跑通。
+
+很多人学了半天理论，第一次写代码就卡在环境上。这个项目就是帮你跨过这道坎。
+
+## 项目目标
+
+1. 写一个Python脚本，能调用大模型API
+2. 实现一个简单的多轮对话（不是一次性调用）
+3. 能解释清楚system、user、assistant三种消息的区别
+
+## 步骤拆解
+
+### 第一步：创建项目文件夹
+\`\`\`bash
+mkdir my-first-agent
+cd my-first-agent
+python -m venv venv
+source venv/bin/activate  # Windows是 venv\\Scripts\\activate
+pip install openai python-dotenv
+\`\`\`
+
+### 第二步：写第一个脚本
+新建文件 \`chat.py\`：
+
+\`\`\`python
+from openai import OpenAI
+from dotenv import load_dotenv
+import os
+
+load_dotenv()  # 从.env文件读API Key
+
+client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
+
+# 多轮对话的历史
+messages = [
+    {"role": "system", "content": "你是一个友好的助手，用中文回答问题。"}
+]
+
+while True:
+    user_input = input("你：")
+    if user_input.lower() in ["退出", "exit", "quit"]:
+        break
+
+    # 把用户输入加到历史里
+    messages.append({"role": "user", "content": user_input})
+
+    # 调API
+    response = client.chat.completions.create(
+        model="gpt-4o",
+        messages=messages
+    )
+
+    reply = response.choices[0].message.content
+    print(f"AI：{reply}")
+
+    # 把AI的回复也加到历史里，下次对话就记得了
+    messages.append({"role": "assistant", "content": reply})
+\`\`\`
+
+### 第三步：配置环境变量
+新建文件 \`.env\`：
+\`\`
+OPENAI_API_KEY=你的API Key
+\`\`
+
+### 第四步：运行
+\`\`bash
+python chat.py
+\`\`
+
+## 验收标准
+
+✅ 程序能正常运行，你输入问题，AI能回答
+✅ 连续对话5轮，AI还记得你最开始说过什么（因为你把历史都传进去了）
+✅ 能说清楚：
+   - system消息是干嘛的？
+   - 为什么要把AI的回复也加到messages里？
+   - 如果不加历史，会发生什么？
+
+## 常见坑
+
+1. **API Key硬编码在代码里**——绝对不要，用.env文件
+2. **忘了把assistant消息加回messages**——这样AI就没有记忆了，每次都像第一次聊天
+3. **模型名字写错**——gpt-4o不是gpt4o，也不是gpt-4
+
+## 下一步
+
+跑通这个之后，你就入门了。下一个项目我们练习写提示词。`
+    },
+
+    {
+      projectNumber: 2,
+      title: '提示词实验室：做一个文本分类器',
+      category: '初级',
+      difficulty: '入门',
+      duration: '1天',
+      prerequisites: ['模块2'],
+      deliverables: ['稳定输出JSON的分类器'],
+      description: '练习写提示词，让模型稳定输出固定格式的JSON，做一个文本分类器。',
+      content: `## 项目背景
+
+很多人觉得提示词工程就是"写得更清楚一点"。其实不是——它是一门技术活。
+
+这个项目就是让你亲手练一下：怎么写提示词，才能让模型每次都输出你要的格式，不胡说八道。
+
+## 项目目标
+
+做一个用户反馈分类器：
+- 输入：用户发的一段话
+- 输出：固定格式的JSON，包含分类结果和置信度
+
+## 步骤拆解
+
+### 第一步：写提示词
+新建文件 \`classifier.py\`：
+
+\`\`\`python
+from openai import OpenAI
+import json
+
+client = OpenAI()
+
+SYSTEM_PROMPT = """你是一个用户反馈分类器。
+把用户反馈分成三类：功能建议、Bug报告、其他。
+
+输出严格的JSON格式，包含两个字段：
+- category: 分类结果，只能是"功能建议"、"Bug报告"、"其他"三者之一
+- confidence: 置信度，0到1之间的数字
+
+不要输出任何其他内容，不要解释，只输出JSON。
+
+示例：
+用户反馈："我希望你们加个夜间模式"
+输出：{"category": "功能建议", "confidence": 0.95}
+
+用户反馈："点保存按钮没反应"
+输出：{"category": "Bug报告", "confidence": 0.98}
+"""
+
+def classify(text):
+    response = client.chat.completions.create(
+        model="gpt-4o",
+        temperature=0,  # 分类任务温度设0，要稳定
+        messages=[
+            {"role": "system", "content": SYSTEM_PROMPT},
+            {"role": "user", "content": text}
+        ],
+        response_format={"type": "json_object"}  # 强制输出JSON
+    )
+    return json.loads(response.choices[0].message.content)
+
+# 测试
+tests = [
+    "能不能导出Excel？",
+    "页面加载太慢了",
+    "你们产品真好用",
+    "登录的时候一直转圈",
+    "我想设置成每周自动备份",
+]
+
+for t in tests:
+    result = classify(t)
+    print(f"{t} → {result}")
+\`\`\`
+
+### 第二步：调优
+跑一下，看看分类准不准。如果有分错的，在提示词里加例子，或者调整描述。
+
+## 验收标准
+
+✅ 连续测10个case，输出全部是合法JSON
+✅ 分类准确率在8/10以上
+✅ 你试过：把temperature从0改成0.7，看输出是不是变得不稳定了
+✅ 你试过：去掉response_format，看模型是不是会在JSON外面加东西
+
+## 实验任务
+
+试着改一下提示词，把分类从3类改成5类：
+- 功能建议
+- Bug报告
+- 性能问题
+- 账号问题
+- 其他
+
+看看你的提示词需要改多少地方才能适配新分类。
+
+## 常见坑
+
+1. **temperature太高**——分类任务一定要设0，不然每次结果都不一样
+2. **没有示例**——光说规则模型可能不理解，给1-2个例子马上就懂
+3. **忘了用JSON Mode**——模型可能会输出\`\`\`json ... \`\`\`这种标记，你还得手动解析`
+    },
+
+    {
+      projectNumber: 3,
+      title: '计算器智能体',
+      category: '初级',
+      difficulty: '中级',
+      duration: '2天',
+      prerequisites: ['模块3'],
+      deliverables: ['第一个完整的工具调用循环'],
+      description: '实现第一个真正的智能体：遇到数学问题自动调用计算器工具，不再自己瞎算。',
+      content: `## 项目背景
+
+LLM算数学很烂——你问它"12345 × 67890等于多少"，它大概率算错。
+
+但如果它能调用一个真正的计算器工具，那就不会错了。这个项目就是做这件事。
+
+## 项目目标
+
+做一个智能体：
+- 你问它普通问题，它直接回答
+- 你问它数学问题，它自动调用计算器工具算完再回答
+
+## 步骤拆解
+
+### 第一步：定义计算器工具
+\`\`\`python
+from openai import OpenAI
+import json
+
+client = OpenAI()
+
+# 定义工具
+tools = [
+    {
+        "type": "function",
+        "function": {
+            "name": "calculator",
+            "description": "计算数学表达式，支持加减乘除和括号",
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "expression": {
+                        "type": "string",
+                        "description": "要计算的数学表达式，比如：(123 + 456) * 2"
+                    }
+                },
+                "required": ["expression"]
+            }
+        }
+    }
+]
+
+# 真正的计算器函数
+def calculator(expression):
+    # 注意：生产环境不要用eval，这里只是演示
+    # 真实场景应该用专门的数学解析库
+    return eval(expression)
+\`\`\`
+
+### 第二步：写智能体循环
+\`\`\`python
+def agent(user_message):
+    messages = [
+        {"role": "system", "content": "你是一个助手。遇到数学问题时调用calculator工具计算，不要自己心算。"},
+        {"role": "user", "content": user_message}
+    ]
+
+    max_steps = 5  # 最多循环5次，防止死循环
+
+    for step in range(max_steps):
+        response = client.chat.completions.create(
+            model="gpt-4o",
+            messages=messages,
+            tools=tools
+        )
+        msg = response.choices[0].message
+        messages.append(msg)
+
+        # 如果模型没要调工具，说明答完了
+        if not msg.tool_calls:
+            return msg.content
+
+        # 执行工具调用
+        for tool_call in msg.tool_calls:
+            name = tool_call.function.name
+            args = json.loads(tool_call.function.arguments)
+
+            if name == "calculator":
+                result = calculator(args["expression"])
+                print(f"  [工具调用] 计算 {args['expression']} = {result}")
+
+            # 把结果传回模型
+            messages.append({
+                "role": "tool",
+                "tool_call_id": tool_call.id,
+                "content": str(result)
+            })
+
+    return "抱歉，这个问题太复杂了，我处理不了。"
+
+# 测试
+print(agent("12345乘以67890等于多少？"))
+print(agent("今天天气怎么样？"))  # 这个应该直接回答，不用工具
+\`\`\`
+
+## 验收标准
+
+✅ 问大数乘法，智能体会自动调用计算器，答案是对的
+✅ 问普通问题，它不会乱调工具
+✅ 你在日志里能看到工具调用的过程
+✅ 你试过：问一个它需要调两次工具的问题，看看循环是不是正常
+
+## 进阶挑战
+
+加第二个工具：单位换算（米转英尺、公斤转磅）。
+然后测试：智能体会不会自己决定该调哪个工具？
+
+## 常见坑
+
+1. **忘了把工具结果传回模型**——你执行完计算器就结束了，模型根本不知道结果
+2. **没有最大步数限制**——模型死循环调工具，烧了一堆Token
+3. **工具描述写得太简单**——模型不知道什么时候该用计算器，就会乱用`
+    },
+
+    // ===== 中级项目 =====
+    {
+      projectNumber: 4,
+      title: '带记忆的聊天助手',
+      category: '中级',
+      difficulty: '中级',
+      duration: '2天',
+      prerequisites: ['模块6'],
+      deliverables: ['对话记忆功能', '上下文压缩'],
+      description: '做一个能记住长期对话的聊天助手，不会聊到第20轮就忘了你是谁。',
+      content: `## 项目背景
+
+你在项目1做的那个聊天机器人，聊个10轮以上就开始忘事了——因为上下文窗口不够，最早的对话被挤出去了。
+
+这个项目解决这个问题：做一个真正有记忆的聊天助手。
+
+## 项目目标
+
+1. 短期记忆：最近10轮对话直接放在上下文里
+2. 长期记忆：重要信息存进数据库，随时能检索
+3. 上下文压缩：对话太长了，把早期的总结成摘要
+
+## 步骤拆解
+
+### 第一步：窗口记忆
+\`\`\`python
+from openai import OpenAI
+
+client = OpenAI()
+
+def trim_messages(messages, max_turns=10):
+    """只保留最近10条对话（5轮），加上system消息"""
+    system = [m for m in messages if m['role'] == 'system']
+    rest = [m for m in messages if m['role'] != 'system']
+    recent = rest[-max_turns:]
+    return system + recent
+
+# 你的对话循环里，每次调API之前先trim一下
+def chat(user_input, history):
+    history.append({"role": "user", "content": user_input})
+    trimmed = trim_messages(history)  # 关键一步
+
+    response = client.chat.completions.create(
+        model="gpt-4o",
+        messages=trimmed
+    )
+    reply = response.choices[0].message.content
+    history.append({"role": "assistant", "content": reply})
+    return reply, history
+\`\`\`
+
+### 第二步：上下文压缩
+对话再长一点，连最近10轮都放不下了，就用摘要代替：
+
+\`\`\`python
+def compress_if_needed(messages):
+    if len(messages) < 20:  # 不到20条不用压缩
+        return messages
+
+    # 把前一半对话总结一下
+    old = messages[:len(messages)//2]
+    recent = messages[len(messages)//2:]
+
+    # 让LLM总结之前的对话
+    summary_prompt = f"总结以下对话的关键信息，150字以内：\\n{old}"
+    summary = client.chat.completions.create(
+        model="gpt-4o",
+        messages=[{"role": "user", "content": summary_prompt}]
+    ).choices[0].message.content
+
+    # 用摘要代替原始对话
+    return [
+        {"role": "system", "content": f"之前的对话摘要：{summary}"}
+    ] + recent
+\`\`\`
+
+### 第三步：长期记忆
+把用户说的重要信息存进向量数据库：
+
+\`\`\`python
+import chromadb
+
+# 初始化记忆库
+memory = chromadb.Client().get_or_create_collection("user_memory")
+
+def save_memory(text):
+    memory.add(documents=[text], ids=[f"mem_{time.time()}"])
+
+def recall(query):
+    results = memory.query(query_texts=[query], n_results=2)
+    return results['documents'][0]
+
+# 用户说"我叫张三，我是做后端开发的"
+# 你检测到这是重要信息，存进记忆
+save_memory("用户叫张三，职业是后端开发")
+
+# 下次用户问"我是做什么的"
+# 先检索记忆，再把结果塞进上下文
+\`\`\`
+
+## 验收标准
+
+✅ 连续对话30轮，AI还记得你最开始说过的名字
+✅ 你测过：不做trim的时候，对话到20轮以上上下文会不会爆
+✅ 你实现了至少一种记忆策略（窗口/摘要/长期）
+
+## 常见坑
+
+1. **什么都存进长期记忆**——存了一堆没用的，检索的时候全是垃圾
+2. **忘了更新记忆**——用户改了偏好，旧的记忆没更新，AI还在按旧的来
+3. **上下文塞太多**——不是越多越好，无关信息会干扰模型`
+    },
+
+    {
+      projectNumber: 5,
+      title: 'RAG文档问答助手',
+      category: '中级',
+      difficulty: '中级',
+      duration: '3天',
+      prerequisites: ['模块4'],
+      deliverables: ['能回答文档问题的知识库'],
+      description: '基于RAG做一个能回答你私有文档问题的助手，比如"我们公司的报销政策是什么？"',
+      content: `## 项目背景
+
+LLM不知道你公司的内部文档、你自己的笔记、你上传的PDF。你直接问它，它就瞎编。
+
+RAG就是解决这个的：先把你的文档存起来，用户提问的时候先找相关内容，再让AI根据资料回答。
+
+## 项目目标
+
+做一个文档问答助手：
+- 上传几个PDF或TXT文档
+- 问文档里的问题，它能准确回答
+- 问文档里没有的问题，它会说"不知道"，不瞎编
+
+## 步骤拆解
+
+### 第一步：装依赖
+\`\`\`bash
+pip install chromadb openai pypdf
+\`\`\`
+
+### 第二步：建知识库
+\`\`\`python
+import chromadb
+from openai import OpenAI
+
+client = OpenAI()
+chroma = chromadb.Client()
+
+# 创建集合
+collection = chroma.create_collection("my_docs")
+
+# 加载文档并切块
+def add_document(text, doc_name):
+    # 简单按段落切块
+    chunks = [p.strip() for p in text.split("\\n\\n") if len(p.strip()) > 50]
+
+    # 存进去
+    collection.add(
+        documents=chunks,
+        ids=[f"{doc_name}_{i}" for i in range(len(chunks))],
+        metadatas=[{"source": doc_name} for _ in chunks]
+    )
+    print(f"  加了 {len(chunks)} 块")
+
+# 试试加一个测试文档
+test_doc = """
+公司报销制度：
+员工出差住宿标准为每天300元以内。
+出差交通费用实报实销，需要提供发票。
+餐饮补贴为每天100元，不需要发票。
+报销需要在出差回来后10天内提交申请。
+
+年假制度：
+入职满1年享5天年假，满10年享10天年假。
+年假需要提前一周申请，由部门经理审批。
+未休年假年底清零，不折算工资。
+"""
+
+add_document(test_doc, "公司制度")
+\`\`\`
+
+### 第三步：实现问答
+\`\`\`python
+def answer(question):
+    # 1. 检索相关文档
+    results = collection.query(query_texts=[question], n_results=3)
+    context = "\\n---\\n".join(results['documents'][0])
+
+    print(f"检索到的资料：\\n{context}\\n")
+
+    # 2. 让LLM根据资料回答
+    response = client.chat.completions.create(
+        model="gpt-4o",
+        messages=[
+            {"role": "system", "content": f"""根据下面的资料回答用户问题。
+如果资料里没有相关信息，就说"我不知道，建议咨询HR部门"。
+不要瞎编。
+
+资料：
+{context}"""},
+            {"role": "user", "content": question}
+        ]
+    )
+    return response.choices[0].message.content
+
+# 测试
+print(answer("出差住宿标准是多少？"))
+print(answer("入职5年有几天年假？"))
+print(answer("今天天气怎么样？"))  # 这个应该回答不知道
+\`\`\`
+
+## 验收标准
+
+✅ 问文档里的问题，回答准确
+✅ 问文档里没有的问题，它会说不知道，不瞎编
+✅ 你试过：把n_results从3改成1，看看回答质量有没有下降
+
+## 进阶挑战
+
+1. 加载一个真实的PDF文档，试试问答效果
+2. 试试混合检索：关键词搜索 + 向量搜索结合，看看准确率有没有提升
+
+## 常见坑
+
+1. **切块太大或太小**——太大了塞太多无关内容，太小了没上下文
+2. **没在提示词里限定"只根据资料回答"**——模型还是会瞎编
+3. **文档格式没处理好**——PDF表格识别错了，存进去的就是垃圾`
+    },
+
+    {
+      projectNumber: 6,
+      title: 'LangGraph调研写作工作流',
+      category: '中级',
+      difficulty: '高级',
+      duration: '4天',
+      prerequisites: ['模块7'],
+      deliverables: ['有状态工作流', '断点恢复'],
+      description: '用LangGraph构建一个多步骤工作流：用户给个主题，自动调研→写大纲→写初稿→审稿。',
+      content: `## 项目背景
+
+简单的智能体就是一个while循环跑到底。但复杂任务需要有明确的步骤、有分支、能暂停恢复。
+
+LangGraph就是干这个的——把工作流画成一张图，每个节点做一件事，边定义下一步去哪。
+
+## 项目目标
+
+做一个自动写作工作流：
+1. 输入一个主题
+2. 节点1：生成大纲
+3. 节点2：根据大纲写初稿
+4. 节点3：审稿并提出修改意见
+5. 节点4：根据修改意见改稿
+
+支持断点恢复：跑到审稿那一步可以暂停，下次接着跑。
+
+## 步骤拆解
+
+### 第一步：装依赖
+\`\`\`bash
+pip install langgraph openai
+\`\`\`
+
+### 第二步：定义状态和节点
+\`\`\`python
+from typing import TypedDict
+from langgraph.graph import StateGraph, START, END
+from openai import OpenAI
+
+client = OpenAI()
+
+# 1. 定义状态：整个工作流共享的数据
+class WorkflowState(TypedDict):
+    topic: str          # 写作主题
+    outline: str        # 大纲
+    draft: str          # 初稿
+    review: str        # 审稿意见
+    final: str          # 最终稿
+
+# 2. 定义节点函数
+def make_outline(state: WorkflowState):
+    """节点1：生成大纲"""
+    response = client.chat.completions.create(
+        model="gpt-4o",
+        messages=[{"role": "user", "content": f"写一篇关于{state['topic']}的文章大纲，3-5个小节"}]
+    )
+    return {"outline": response.choices[0].message.content}
+
+def write_draft(state: WorkflowState):
+    """节点2：写初稿"""
+    response = client.chat.completions.create(
+        model="gpt-4o",
+        messages=[{"role": "user", "content": f"根据这个大纲写一篇800字的文章：\\n{state['outline']}"}]
+    )
+    return {"draft": response.choices[0].message.content}
+
+def review_draft(state: WorkflowState):
+    """节点3：审稿"""
+    response = client.chat.completions.create(
+        model="gpt-4o",
+        messages=[{"role": "user", "content": f"审稿，指出3个可以改进的地方：\\n{state['draft']}"}]
+    )
+    return {"review": response.choices[0].message.content}
+
+def revise(state: WorkflowState):
+    """节点4：修改"""
+    response = client.chat.completions.create(
+        model="gpt-4o",
+        messages=[{"role": "user", "content": f"根据审稿意见修改文章：\\n文章：{state['draft']}\\n意见：{state['review']}"}]
+    )
+    return {"final": response.choices[0].message.content}
+\`\`\`
+
+### 第三步：建图并运行
+\`\`\`python
+from langgraph.checkpoint.memory import MemorySaver
+
+# 3. 建图
+graph = StateGraph(WorkflowState)
+graph.add_node("outline", make_outline)
+graph.add_node("draft", write_draft)
+graph.add_node("review", review_draft)
+graph.add_node("revise", revise)
+
+# 定义边：流程怎么走
+graph.add_edge(START, "outline")   # 开始 → 写大纲
+graph.add_edge("outline", "draft") # 写大纲 → 写初稿
+graph.add_edge("draft", "review")  # 写初稿 → 审稿
+graph.add_edge("review", "revise") # 审稿 → 修改
+graph.add_edge("revise", END)      # 修改 → 结束
+
+# 4. 加checkpointer，支持断点恢复
+checkpointer = MemorySaver()
+app = graph.compile(checkpointer=checkpointer)
+
+# 5. 运行
+config = {"configurable": {"thread_id": "my-thread-1"}}
+result = app.invoke({"topic": "什么是RAG"}, config)
+
+print("最终文章：", result["final"])
+\`\`\`
+
+## 验收标准
+
+✅ 工作流能完整跑完：大纲→初稿→审稿→修改
+✅ 你试试：跑到一半中断，然后用同一个thread_id接着跑，它能从断点继续
+✅ 你加一个条件分支：如果审稿说"不用改"，就直接结束，不用进revise节点
+
+## 常见坑
+
+1. **状态设计不好**——什么都往state里塞，节点之间互相依赖
+2. **忘了传thread_id**——checkpoint不生效，每次都是从头跑
+3. **节点太复杂**——一个节点干了5件事，出了问题不知道哪步错了`
+    },
+
+    // ===== 高级项目 =====
+    {
+      projectNumber: 7,
+      title: '多智能体写作团队',
+      category: '高级',
+      difficulty: '高级',
+      duration: '5天',
+      prerequisites: ['模块8'],
+      deliverables: ['多智能体协作Demo'],
+      description: '用CrewAI搭一个写作团队：研究员找资料、撰稿人写文章、审稿人把关，三个角色分工合作。',
+      content: `## 项目背景
+
+一个智能体干所有事，往往效果不好——因为它既要懂调研、又要会写作、还要会审稿，角色太分裂了。
+
+多智能体就是让不同的专家分工合作：研究员只负责找资料，撰稿人只负责写，审稿人只负责挑毛病。
+
+## 项目目标
+
+用CrewAI搭一个三人写作团队：
+- **研究员**：收集主题相关的资料，整理要点
+- **撰稿人**：根据资料写文章
+- **审稿人**：审稿，提出修改意见
+
+最后输出一篇完整的文章。
+
+## 步骤拆解
+
+### 第一步：装依赖
+\`\`\`bash
+pip install crewai
+\`\`\`
+
+### 第二步：定义角色和任务
+\`\`\`python
+from crewai import Agent, Task, Crew, Process
+
+# 1. 定义三个角色
+researcher = Agent(
+    role="行业研究员",
+    goal="收集关于{topic}的最新信息和关键数据",
+    backstory="你是一个专业的行业研究员，擅长找资料、提炼核心要点。你写的调研摘要简洁有力，没有废话。",
+    verbose=True
+)
+
+writer = Agent(
+    role="资深撰稿人",
+    goal="根据研究员的资料，写一篇通俗易懂的科普文章",
+    backstory="你是一个有10年经验的科技作者，擅长把复杂的技术概念讲得连外行都能看懂。",
+    verbose=True
+)
+
+reviewer = Agent(
+    role="审稿编辑",
+    goal="检查文章的准确性、可读性，提出具体修改意见",
+    backstory="你是一个严格的编辑，注重细节。你能一眼看出文章哪里逻辑不通、哪里太技术化读者看不懂。",
+    verbose=True
+)
+
+# 2. 定义任务
+research_task = Task(
+    description="调研{topic}的最新进展，整理3个核心要点，每个要点配一个数据或例子。",
+    agent=researcher,
+    expected_output="一份300字的调研摘要，包含3个核心要点"
+)
+
+write_task = Task(
+    description="根据调研摘要，写一篇800字的科普文章，面向零基础读者。",
+    agent=writer,
+    expected_output="一篇结构清晰、通俗易懂的文章，有开头、正文、结尾"
+)
+
+review_task = Task(
+    description="审稿，指出2个可以改进的地方，并给出修改建议。",
+    agent=reviewer,
+    expected_output="审稿意见列表，每条包含问题描述和修改建议"
+)
+\`\`\`
+
+### 第三步：组队运行
+\`\`\`python
+# 3. 组队，按顺序执行
+crew = Crew(
+    agents=[researcher, writer, reviewer],
+    tasks=[research_task, write_task, review_task],
+    process=Process.sequential
+)
+
+# 4. 跑起来
+result = crew.kickoff(inputs={"topic": "AI智能体2026年的发展趋势"})
+print(result)
+\`\`\`
+
+## 验收标准
+
+✅ 三个角色各司其职，流程跑通
+✅ 你能看到每一步的输入输出（开了verbose）
+✅ 对比一下：单智能体直接写文章，和三智能体协作写的，质量有没有差别？
+
+## 进阶挑战
+
+改成层级模式：加一个"主编"智能体，负责分配任务、汇总结果，而不是固定顺序跑。
+
+## 常见坑
+
+1. **角色设计太模糊**——"你是个助手"这种角色等于没设计
+2. **任务描述不明确**——没说输出格式、输出长度，智能体就自由发挥了
+3. **Token成本爆炸**——每个智能体都要调LLM，三个角色跑一次就是好几次调用，成本不低`
+    },
+
+    {
+      projectNumber: 8,
+      title: '给智能体接入可观测性',
+      category: '高级',
+      difficulty: '高级',
+      duration: '3天',
+      prerequisites: ['模块9'],
+      deliverables: ['完整Trace', '自动化评测集'],
+      description: '给你之前做的RAG问答助手接入Langfuse，能看到每一步干了什么，建一个10个case的自动化评测集。',
+      content: `## 项目背景
+
+你的RAG助手现在能跑了，但你不知道：
+- 它每一步花了多久？
+- 哪一步最慢？
+- 这个Prompt改完，到底是变好了还是变差了？
+
+靠感觉是不行的。你得有数据。这个项目就是给你装上"监控仪表盘"。
+
+## 项目目标
+
+1. 接入Langfuse，能看到每次请求的完整Trace
+2. 建一个10个case的评测集，每次改完代码能一键跑
+3. 用LLM-as-Judge自动打分
+
+## 步骤拆解
+
+### 第一步：部署Langfuse
+用Docker最方便：
+\`\`bash
+git clone https://github.com/langfuse/langfuse.git
+cd langfuse
+docker-compose up -d
+\`\`
+
+打开 localhost:3000 注册账号，创建项目，拿到API Key。
+
+### 第二步：在代码里接入
+\`\`\`python
+# 就换一个import，其他都不用改
+from langfuse.openai import openai
+
+client = openai.OpenAI()
+
+# 你原来的RAG代码...
+# 现在每次调用都会自动记录到Langfuse了
+\`\`\`
+
+去Langfuse后台看一下，是不是能看到刚才的调用Trace了？
+
+### 第三步：建评测集
+准备10个测试用例：
+\`\`json
+[
+  {"question": "出差住宿标准是多少？", "expected": "每天300元以内"},
+  {"question": "年假有几天？", "expected": "入职1年5天，10年10天"},
+  {"question": "报销要多久内提交？", "expected": "出差回来后10天内"},
+  {"question": "今天天气怎么样？", "expected": "不知道，建议咨询HR"},
+  ...
+]
+\`\`
+
+### 第四步：写评测脚本
+\`\`\`python
+def evaluate(question, expected):
+    actual = answer(question)  # 你的RAG函数
+
+    judge_prompt = f"""你是一个严格的评委。根据标准答案，给回答打1-5分。
+
+问题：{question}
+标准答案：{expected}
+实际回答：{actual}
+
+只输出分数和一句话理由。"""
+
+    score = client.chat.completions.create(
+        model="gpt-4o",
+        messages=[{"role": "user", "content": judge_prompt}]
+    ).choices[0].message.content
+
+    return score
+
+# 跑一遍所有测试用例
+for case in test_cases:
+    result = evaluate(case["question"], case["expected"])
+    print(f"{case['question']}: {result}")
+\`\`\`
+
+## 验收标准
+
+✅ 在Langfuse里能看到每次调用的完整Trace：传了什么、回了什么、花了多久
+✅ 评测集10个case能一键跑完，有分数
+✅ 你改一下Prompt，跑一遍评测，对比分数有没有变化
+
+## 常见坑
+
+1. **评测集太小**——只有3、5个case，测不出问题
+2. **只看平均分**——平均分4分，可能某一类问题只有2分，要分类别看
+3. **过度刷分**——为了让评测集分高，把Prompt改得只适合这几个case，实际用户用起来还是不好`
+    },
+
+    {
+      projectNumber: 9,
+      title: '毕业项目：生产级智能体应用',
+      category: '高级',
+      difficulty: '专家',
+      duration: '14天',
+      prerequisites: ['全部'],
+      deliverables: ['完整可上线的智能体'],
+      description: '综合运用所有知识，从零做一个真正能给人用的生产级智能体应用。这是你的毕业考试。',
+      content: `## 项目背景
+
+恭喜你学到这里！前面的项目都是在练单点技能。这个毕业项目就是把所有东西串起来，做一个真正能上线的产品。
+
+## 你要做什么
+
+选一个你工作或生活里的真实问题，做一个智能体解决它。
+
+比如：
+- 会议纪要助手：上传会议录音，自动整理成纪要
+- 代码审查助手：提交PR的时候自动审查代码
+- 个人知识库：把你所有笔记攒成一个能问答的知识库
+- 客服机器人：回答你公司产品的常见问题
+
+## 必须包含的功能
+
+### 核心功能
+1. ✅ 用户登录注册
+2. ✅ 核心智能体功能（你选的那个问题的解决方案）
+
+### 工程化要求
+3. ✅ 有工具调用（至少2个工具）
+4. ✅ 有记忆或RAG（不是纯聊天）
+5. ✅ 接入了Langfuse，能看Trace
+6. ✅ 有至少10个case的评测集
+7. ✅ 有基本的护栏：输入过滤、输出检查
+
+### 部署要求
+8. ✅ 打包成Docker，能一键启动
+9. ✅ 有README，别人照着能跑起来
+
+## 建议的开发顺序
+
+1. **先做核心功能**：先把智能体跑通，能解决问题就行
+2. **再加工程化**：接监控、加护栏、写评测
+3. **最后做用户界面**：别一上来就做界面，核心功能最重要
+
+## 验收标准
+
+✅ 有真实用户用（哪怕是你自己和你朋友）
+✅ 出了问题你能在Langfuse里看到是哪一步错了
+✅ 你能说出：这个智能体现在成本是多少一次请求？主要瓶颈在哪？
+
+## 做完这个，你就出师了
+
+你已经掌握了：
+- LLM API和提示词工程
+- 工具调用和Function Calling
+- RAG和向量数据库
+- 工作流编排和多智能体
+- 可观测性和评测
+- 生产部署和安全
+
+这就是一个高级AI智能体开发工程师该有的全套技能。剩下的就是在实际项目里继续打磨了。
+
+加油！`
+    },
   ];
 
   for (const p of projects) {

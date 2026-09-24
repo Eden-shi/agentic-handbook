@@ -1,6 +1,7 @@
 import { Routes, Route, Navigate } from 'react-router-dom';
 import Layout from './components/Layout';
 import RequireAuth from './components/RequireAuth';
+import RequireAdmin from './components/RequireAdmin';
 import Overview from './pages/Overview';
 import Stages from './pages/Stages';
 import Projects from './pages/Projects';
@@ -32,10 +33,10 @@ export default function App() {
         <Route path="notes" element={<Notes />} />
         <Route path="settings" element={<Settings />} />
         <Route path="about" element={<About />} />
-        <Route path="admin" element={<Admin />} />
-        <Route path="admin/users" element={<AdminUsers />} />
-        <Route path="admin/users/:id" element={<AdminUserDetail />} />
-        <Route path="admin/content" element={<AdminContent />} />
+        <Route path="admin" element={<RequireAdmin><Admin /></RequireAdmin>} />
+        <Route path="admin/users" element={<RequireAdmin><AdminUsers /></RequireAdmin>} />
+        <Route path="admin/users/:id" element={<RequireAdmin><AdminUserDetail /></RequireAdmin>} />
+        <Route path="admin/content" element={<RequireAdmin><AdminContent /></RequireAdmin>} />
       </Route>
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>

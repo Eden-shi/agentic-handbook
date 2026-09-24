@@ -1,7 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import ReactMarkdown from 'react-markdown';
-import remarkGfm from 'remark-gfm';
+import Markdown from '../components/Markdown';
 import api from '../lib/api';
 import { useAuth } from '../lib/auth';
 
@@ -46,7 +45,7 @@ export default function StageDetail() {
       </div>
       <div className="card" style={{ fontSize: 15, lineHeight: 1.9 }}>
         <div className="markdown-body">
-          <ReactMarkdown remarkPlugins={[remarkGfm]}>{stage.content}</ReactMarkdown>
+          <Markdown>{stage.content}</Markdown>
         </div>
         {stage.topics?.length > 0 && (
           <div style={{ marginTop: 20, paddingTop: 16, borderTop: '1px solid var(--border)' }}>

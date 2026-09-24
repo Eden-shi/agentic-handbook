@@ -183,6 +183,39 @@ python hello.py
 
 3. **网络问题**。如果连不上OpenAI，检查一下你的网络能不能访问国外网站。
 
+## 配图清单
+
+**1. 流程图：环境搭建步骤（Mermaid，可直接渲染）**
+
+\`\`\`mermaid
+flowchart TD
+    A([开始]) --> B[安装Python 3.11+<br/>勾选 Add Python to PATH]
+    B --> C[安装VS Code<br/>+ Python/Pylance 插件]
+    C --> D[注册 OpenAI / Claude 账号]
+    D --> E[创建并妥善保存 API Key]
+    E --> F["pip install openai"]
+    F --> G[编写 hello.py]
+    G --> H{运行成功?}
+    H -->|是| I([环境就绪])
+    H -->|否| J[排查 PATH / Key / 网络]
+    J --> G
+\`\`\`
+
+**2. 架构图：智能体四能力关系**
+核心组件与调用关系：用户目标 → 规划（拆步骤）→ 行动（调工具，作用于外部API/文件/网页）→ 感知（读取返回）→ 反思（检查结果），形成闭环。绘制建议：用Excalidraw画一个环形箭头，四个象限分别写"感知/规划/行动/反思"，中心写"LLM大脑"。
+
+**3. 界面截图占位符**
+- 【截图需求：Python安装向导，需红框标出"Add Python x.x to PATH"复选框】
+- 【截图需求：OpenAI平台 API Key 创建页面，需标出"Create new secret key"按钮及密钥只显示一次的提示】
+
+## 参考文献
+
+1. OpenAI API Quickstart（官方快速开始）：https://platform.openai.com/docs/quickstart
+2. OpenAI API Keys 管理页：https://platform.openai.com/api-keys
+3. Claude 平台文档（原Anthropic）：https://platform.claude.com/docs
+4. Python 官方下载：https://www.python.org/downloads/
+5. VS Code 下载：https://code.visualstudio.com/
+
 ## 学完这个模块，你应该能做到
 
 - 用自己的话解释智能体和普通聊天的区别
@@ -358,6 +391,40 @@ ReAct = Reasoning + Acting（推理 + 行动）。
 2. **一次要求太多**。让模型一次干5件事，它会顾此失彼。拆成多步。
 3. **用否定句**。"不要做X"不如直接说"做Y"。模型对否定句理解不好。
 4. **temperature太高**。做生产系统先设0，稳定最重要。
+
+## 配图清单
+
+**1. 流程图：一次 Chat Completion 调用（Mermaid）**
+
+\`\`\`mermaid
+flowchart LR
+    A[组装 messages<br/>system/user/assistant] --> B["调用 chat.completions.create<br/>含 temperature 等参数"]
+    B --> C{finish_reason}
+    C -->|stop| D[返回完整回答]
+    C -->|length| E[被截断<br/>需续写或调大 max_tokens]
+    C -->|tool_calls| F[需调用工具<br/>进入第03章流程]
+\`\`\`
+
+**2. 架构图：提示词的结构层次**
+组件与顺序：System Prompt（角色+规则+输出格式，优先级最高）→ Few-shot 示例（输入→输出范例）→ 当前 User 问题。绘制建议：用draw.io画三层堆叠的横向长条，从上到下依次标注，并用颜色区分"固定部分/示例部分/动态部分"。
+
+**3. 界面截图占位符**
+- 【截图需求：OpenAI Playground 界面，需标出 System Prompt 输入区、temperature 滑块、右侧模型返回区】
+- 【截图需求：response_format=json_schema 配置示例的返回结果，需标出严格 JSON 输出】
+
+**4. 代码对比表：两种强制JSON方式**
+
+| 方式 | 参数 | 特点 |
+|------|------|------|
+| JSON Mode | response_format={"type":"json_object"} | 简单，只保证是合法JSON |
+| Structured Outputs | response_format={"type":"json_schema",...} | 严格遵循自定义Schema，字段不缺失，推荐 |
+
+## 参考文献
+
+1. OpenAI Prompt Engineering Guide（官方提示词工程指南）：https://platform.openai.com/docs/guides/prompt-engineering
+2. OpenAI Structured Outputs：https://platform.openai.com/docs/guides/structured-outputs
+3. Claude 提示词工程文档：https://platform.claude.com/docs/build-with-claude/prompt-engineering/overview
+4. OpenAI Text Generation 参数说明：https://platform.openai.com/docs/guides/text-generation
 
 ## 学完这个模块，你应该能做到
 
@@ -561,6 +628,41 @@ for step in range(max_steps):
 3. **忘了把工具结果传回模型**：你执行完工具就结束了，模型根本不知道结果，它当然答不对。
 4. **没有最大步数限制**：模型陷入死循环，烧了一堆Token才发现。
 
+## 配图清单
+
+**1. 流程图：Function Calling 完整循环（Mermaid）**
+
+\`\`\`mermaid
+flowchart TD
+    A[用户问题 + tools 列表] --> B[调用模型]
+    B --> C{模型返回}
+    C -->|含 tool_calls| D[解析函数名与参数]
+    D --> E[本地执行工具函数]
+    E --> F[''role: tool'' 回传结果<br/>带 tool_call_id]
+    F --> B
+    C -->|无 tool_calls| G[输出最终答案，结束]
+\`\`\`
+
+**2. 架构图：一次工具调用的消息序列**
+组件：应用程序、LLM、本地工具函数。调用关系：应用 → LLM（返回要调用的函数名+JSON参数）→ 应用执行本地函数 → 应用把结果回传 LLM → LLM 生成自然语言结论。绘制建议：用draw.io画时序图（三条生命线：App / LLM / Tool），按上述顺序画消息箭头。
+
+**3. 界面截图占位符**
+- 【截图需求：OpenAI Function Calling 文档中的 tools 参数结构，需标出 type/function/name/description/parameters 各字段】
+
+**4. 代码对比表：新旧工具接口（避免踩坑）**
+
+| 版本 | 传参 | 返回字段 | 状态 |
+|------|------|---------|------|
+| 旧版（2023.06前） | functions / function_call | function_call | 已废弃 |
+| 现版 | tools / tool_choice | message.tool_calls（支持并行多工具） | 当前使用 |
+
+## 参考文献
+
+1. OpenAI Function Calling 指南：https://platform.openai.com/docs/guides/function-calling
+2. OpenAI Tools/Function 接口参考：https://platform.openai.com/docs/api-reference/chat/create#chat-create-tools
+3. Claude Tool Use 文档：https://platform.claude.com/docs/agents-and-tools/tool-use/overview
+4. OpenAI 并行工具调用说明：https://platform.openai.com/docs/guides/function-calling#parallel-function-calling
+
 ## 学完这个模块，你应该能做到
 
 - 解释Function Calling的工作流程
@@ -760,6 +862,49 @@ print(answer("年假有几天？"))
 3. **没做重排序**：检索出来的内容质量差，白搭。
 4. **文档格式没处理好**：PDF的表格、图片识别错了，存进去的就是垃圾。
 
+## 配图清单
+
+**1. 流程图：RAG 离线建库 + 在线问答（Mermaid）**
+
+\`\`\`mermaid
+flowchart TD
+    subgraph OFF[离线阶段：建库]
+      A[原始文档 PDF/Word] --> B[清洗与切块 Chunking]
+      B --> C[调用 Embedding 生成向量]
+      C --> D[(向量数据库)]
+    end
+    subgraph ON[在线阶段：问答]
+      E[用户提问] --> F[问题向量化]
+      F --> G[相似度检索 Top-K]
+      G --> H[重排序 Rerank]
+      H --> I[拼接上下文 + 问题]
+      I --> J[LLM 生成带依据的答案]
+    end
+    D -.提供候选.-> G
+\`\`\`
+
+**2. 架构图：RAG核心组件**
+组件：文档加载器、文本分割器、嵌入模型、向量数据库、检索器、LLM。调用关系：文档经分割→嵌入→存入向量库；提问经嵌入→检索器从向量库取Top-K→（可选重排序）→拼入Prompt→LLM作答。绘制建议：用Excalidraw画左右两个区域（离线/在线），向量数据库用圆柱体，两个阶段都连到它。
+
+**3. 界面截图占位符**
+- 【截图需求：一个RAG问答界面，问题下方展示"引用来源：第X页"的展开片段，体现答案可溯源】
+
+**4. 代码对比表：检索策略**
+
+| 策略 | 原理 | 适用 |
+|------|------|------|
+| 纯向量检索 | 语义相似度 | 同义改写、概念性问题 |
+| 纯关键词 BM25 | 词项匹配 | 专有名词、型号、编号 |
+| 混合检索 Hybrid | 两者融合 + RRF | 生产推荐，召回最稳 |
+
+## 参考文献
+
+1. OpenAI Embeddings 指南：https://platform.openai.com/docs/guides/embeddings
+2. Chroma 官方文档：https://docs.trychroma.com
+3. RAGAS（RAG评测框架）：https://github.com/explodinggradients/ragas
+4. LangChain RAG 教程：https://python.langchain.com/docs/tutorials/rag/
+5. BGE 开源嵌入模型：https://huggingface.co/BAAI/bge-small-zh-v1.5
+
 ## 学完这个模块，你应该能做到
 
 - 解释RAG是什么、为什么需要它
@@ -896,6 +1041,45 @@ MCP给智能体开了很多权限，你得注意安全：
 2. **危险操作要确认**：删除文件、发邮件、花钱这种操作，一定要加人工确认。
 3. **不要给生产数据库写权限**：只读查询可以，写操作要严格限制。
 
+## 配图清单
+
+**1. 流程图：MCP 客户端-服务器架构（Mermaid）**
+
+\`\`\`mermaid
+flowchart LR
+    H["Host 宿主<br/>(Claude Desktop / IDE / 应用)"]
+    H <-->|"MCP (JSON-RPC over stdio/HTTP)"| C1[Client 连接器1]
+    H <-->|"MCP"| C2[Client 连接器2]
+    C1 --- S1["MCP Server A<br/>文件系统"]
+    C2 --- S2["MCP Server B<br/>远程 API"]
+    S1 --> R1[(本地文件)]
+    S2 --> R2[(云端服务)]
+\`\`\`
+
+**2. 架构图：MCP三大能力**
+组件：Host（内含一个或多个Client）、MCP Server、本地/远程资源。Server向Client暴露三类能力：Tools（可执行函数）、Resources（可读取的数据）、Prompts（可复用模板）。绘制建议：用draw.io画一个Host大方框，里面放Client小方框，通过双向箭头连到外部多个Server，每个Server旁标注它提供的 Tools/Resources/Prompts。
+
+**3. 界面截图占位符**
+- 【截图需求：Claude Desktop 配置文件 claude_desktop_config.json 的内容，需标出 mcpServers 结构】
+- 【截图需求：客户端成功连上MCP Server后，工具列表被识别的界面】
+
+**4. 代码对比表：MCP 与传统自定义函数**
+
+| 对比项 | 自己写函数对接 | MCP 标准协议 |
+|--------|--------------|-------------|
+| 复用性 | 绑定单一项目 | 一次编写，多客户端通用 |
+| 接入成本 | 每个工具手写胶水 | 配置即可 |
+| 生态 | 无 | 大量现成 Server |
+| 传输 | 进程内 | stdio / HTTP / SSE |
+
+## 参考文献
+
+1. MCP 官方文档首页：https://modelcontextprotocol.io
+2. MCP 协议规范：https://modelcontextprotocol.io/specification
+3. MCP 官方 Servers 仓库：https://github.com/modelcontextprotocol/servers
+4. FastMCP（Python）文档：https://gofastmcp.com
+5. GitHub 官方 MCP Server：https://github.com/github/github-mcp-server
+
 ## 学完这个模块，你应该能做到
 
 - 解释MCP是什么、为什么需要它
@@ -1029,6 +1213,43 @@ def compress_messages(messages):
 1. **把所有历史都塞进去**：看起来是"记住了"，其实模型根本看不过来，而且很贵。
 2. **长期记忆存太多垃圾**：什么都存，检索的时候全是没用的。要存就存重要的。
 3. **忘了更新记忆**：用户改了偏好，旧的记忆没更新，智能体还在按旧的来。
+
+## 配图清单
+
+**1. 流程图：记忆系统分类与流转（Mermaid）**
+
+\`\`\`mermaid
+flowchart TD
+    A[智能体记忆] --> B[短期记忆<br/>当前上下文窗口]
+    A --> C[长期记忆]
+    B --> B1[滑动窗口]
+    B --> B2[滚动摘要]
+    C --> C1[语义记忆：事实/偏好<br/>向量库]
+    C --> C2[情节记忆：事件经历]
+    C --> C3[程序记忆：技能/流程]
+    B2 -.摘要后写入.-> C
+\`\`\`
+
+**2. 架构图：记忆读写链路**
+组件：对话管理器、短期记忆缓冲、摘要器、嵌入模型、长期记忆向量库。调用关系：每轮对话先进短期缓冲；超窗口时旧内容经摘要器压缩；重要信息经嵌入写入长期库；下一轮先从长期库检索相关记忆注入上下文。绘制建议：用Excalidraw画"短期（内存）"和"长期（向量库圆柱）"两个框，中间用双向箭头表示"检索/写入"，摘要器画在短期框旁。
+
+**3. 界面截图占位符**
+- 【截图需求：一个"记得用户偏好"的多轮对话，第1轮用户说"我叫老王、对花生过敏"，隔几轮后智能体主动引用该信息】
+
+**4. 代码对比表：短期记忆方案**
+
+| 方案 | 做法 | 优点 | 缺点 |
+|------|------|------|------|
+| 全量历史 | 全部回传 | 信息全 | Token爆炸 |
+| 滑动窗口 | 只留最近N轮 | 简单 | 丢失早期信息 |
+| 滚动摘要 | LLM总结旧对话 | 省Token、保主线 | 摘要可能丢细节 |
+
+## 参考文献
+
+1. LangChain Memory 概念文档：https://python.langchain.com/docs/concepts/memory/
+2. LangChain 对话记忆教程：https://python.langchain.com/docs/versions/migrating_memory/
+3. LangGraph 持久化 Checkpoint：https://langchain-ai.github.io/langgraph/concepts/persistence/
+4. Mem0（长期记忆框架）：https://github.com/mem0ai/mem0
 
 ## 学完这个模块，你应该能做到
 
@@ -1218,6 +1439,48 @@ app.invoke({"approval": "continue"}, config)
 2. **死循环**：条件路由写错了，节点之间互相跳出不来。一定要设最大步数。
 3. **忘了传thread_id**：checkpoint不生效，每次都是从头跑。
 4. **节点太复杂**：一个节点干了5件事，出了问题不知道哪步错了。节点要小，一件事一个节点。
+
+## 配图清单
+
+**1. 流程图：一个带分支与人工审批的状态图（Mermaid）**
+
+\`\`\`mermaid
+flowchart TD
+    S([START]) --> N1[意图分类节点]
+    N1 --> N2{条件路由}
+    N2 -->|类型A| N3[处理分支A]
+    N2 -->|类型B| N4[处理分支B]
+    N3 --> N5[人工审批 interrupt]
+    N4 --> N5
+    N5 -->|通过| N6[汇总输出]
+    N5 -->|打回| N1
+    N6 --> E([END])
+\`\`\`
+
+**2. 架构图：LangGraph运行时核心组件**
+组件：State（共享数据，含messages及自定义字段）、Node（处理函数，读改State）、Edge（普通边/条件边）、Checkpointer（持久化，按thread_id存取）。调用关系：START → 节点 →（条件边按返回值选下一节点）→ … → END；每步结束Checkpointer自动保存状态。绘制建议：用draw.io画节点圆圈和菱形条件分支，底部画一个"Checkpointer"圆柱体，用虚线连到每个节点表示自动存档。
+
+**3. 界面截图占位符**
+- 【截图需求：LangGraph Studio 图可视化界面，需标出节点、条件分支和当前执行高亮位置】
+- 【截图需求：interrupt 中断后，用 Command(resume=...) 恢复的代码与执行结果】
+
+**4. 代码对比表：循环 vs 状态图**
+
+| 对比项 | while 循环 Agent | LangGraph 状态图 |
+|--------|-----------------|-----------------|
+| 分支 | 难表达 | 条件边原生支持 |
+| 循环/重试 | 手写 | 边可回环 |
+| 断点恢复 | 无 | Checkpoint |
+| 人工介入 | 难 | interrupt/Command |
+| 可视化 | 无 | LangGraph Studio |
+
+## 参考文献
+
+1. LangGraph 官方文档：https://langchain-ai.github.io/langgraph/
+2. LangGraph 核心概念（State/Node/Edge）：https://langchain-ai.github.io/langgraph/concepts/low_level/
+3. LangGraph 持久化与记忆：https://langchain-ai.github.io/langgraph/concepts/persistence/
+4. Human-in-the-loop 指南：https://langchain-ai.github.io/langgraph/concepts/human_in_the_loop/
+5. LangGraph 教程（含代码）：https://langchain-ai.github.io/langgraph/tutorials/introduction/
 
 ## 学完这个模块，你应该能做到
 
@@ -1427,6 +1690,49 @@ backstory不是写小说，是告诉这个智能体"你擅长什么、你做事�
 3. **调试困难**：出了问题不知道是哪个智能体的错。一定要开verbose日志，把每一步的输入输出都记下来。
 4. **成本爆炸**：每个智能体都要调LLM，多智能体的Token消耗是单智能体的好几倍。
 
+## 配图清单
+
+**1. 流程图：Supervisor 多智能体调度（Mermaid）**
+
+\`\`\`mermaid
+flowchart TD
+    U([用户目标]) --> Sup[Supervisor 主管]
+    Sup -->|分派任务| W1[研究员 Agent]
+    Sup -->|分派任务| W2[写手 Agent]
+    W1 -->|返回结果| Sup
+    W2 -->|返回结果| Sup
+    Sup -->|汇总判断| C{是否完成?}
+    C -->|否,继续分派| W1
+    C -->|是| Out([最终交付])
+\`\`\`
+
+**2. 架构图：三种协作拓扑对比**
+组件与调用关系：
+- Supervisor：主管居中，工人只与主管双向通信，工人之间不直接相连（星形）
+- Pipeline：研究员 → 写手 → 审核员，单向链式
+- Swarm：各 Agent 之间全连接、自由对话（网状）
+绘制建议：用draw.io并排画三个小图，分别是星形/链式/网状，用箭头方向体现"谁能跟谁说话"。
+
+**3. 界面截图占位符**
+- 【截图需求：CrewAI 运行时 verbose 日志，需标出每个 Agent 的思考、工具调用和任务交接顺序】
+- 【截图需求：LangGraph Supervisor 图在 Studio 中的可视化（主管 + 各工人节点 + 回环边）】
+
+**4. 代码对比表：三种协作模式选型**
+
+| 模式 | 控制力 | 灵活度 | 调试难度 | 适用 |
+|------|--------|--------|---------|------|
+| Supervisor | 高 | 中 | 中 | 大多数生产任务 |
+| Pipeline | 高 | 低 | 易 | 步骤固定的流水线 |
+| Swarm | 低 | 高 | 难 | 探索/研究场景 |
+
+## 参考文献
+
+1. LangGraph 多智能体概念：https://langchain-ai.github.io/langgraph/concepts/multi_agent/
+2. LangGraph Supervisor 教程：https://langchain-ai.github.io/langgraph/tutorials/multi_agent/agent_supervisor/
+3. CrewAI 官方文档：https://docs.crewai.com
+4. Microsoft AutoGen 文档：https://microsoft.github.io/autogen/
+5. Google A2A 协议（Agent2Agent）：https://github.com/google-a2a/A2A
+
 ## 学完这个模块，你应该能做到
 
 - 判断什么时候该用多智能体、什么时候不该用
@@ -1603,6 +1909,48 @@ def evaluate(question, expected, actual):
 2. **评测集不更新**：线上出了新问题，不往评测集里加。评测集要持续增长。
 3. **只看总分**：总分90分，可能某个类别只有50分。要分类别看。
 4. **过度优化评测集**：为了刷分把提示词改得只适合这100个case，实际用户用起来还是不好。
+
+## 配图清单
+
+**1. 流程图：可观测性三支柱与问题定位（Mermaid）**
+
+\`\`\`mermaid
+flowchart LR
+    A[智能体一次运行] --> B[Trace 链路追踪]
+    A --> C[Metrics 指标]
+    A --> D[Feedback 用户反馈/评分]
+    B --> E[还原每一步输入输出]
+    C --> F[Token/成本/延迟/成功率]
+    D --> G[发现 bad case]
+    E --> H[定位根因]
+    F --> H
+    G --> I[加入评测集 → 回归测试]
+    H --> I
+\`\`\`
+
+**2. 架构图：评测闭环**
+组件：线上运行、Trace采集、评测数据集（Dataset）、评估器（规则/LLM-as-Judge/人工）、CI回归。调用关系：线上请求产生Trace；bad case沉淀进Dataset；每次改Prompt/代码后批量跑Dataset，评估器打分；分数对比决定能否发布。绘制建议：用draw.io画一个环形（运行→采集→评测→改进→再运行），中间放"数据驱动迭代"。
+
+**3. 界面截图占位符**
+- 【截图需求：LangSmith/Langfuse 的一条 Trace 树，需展开每个 LLM/工具节点的输入输出，标出耗时与Token】
+- 【截图需求：Dataset 批量跑评测后的得分看板，需标出每条用例的通过/失败及Judge理由】
+
+**4. 代码对比表：两类可观测平台**
+
+| 对比项 | LangSmith | Langfuse |
+|--------|-----------|----------|
+| 开源/自托管 | 否 | 是 |
+| 与LangGraph集成 | 最顺 | 良好 |
+| 自动评测 | 强 | 有 |
+| 适合 | 快速上手、全托管 | 数据敏感、自托管 |
+
+## 参考文献
+
+1. LangSmith 官方文档：https://docs.smith.langchain.com
+2. LangSmith 评测（Evaluators）：https://docs.smith.langchain.com/evaluation
+3. Langfuse 文档：https://langfuse.com/docs
+4. RAGAS 评测框架文档：https://docs.ragas.io
+5. OpenAI Evals 介绍：https://platform.openai.com/docs/guides/evals
 
 ## 学完这个模块，你应该能做到
 
@@ -1837,6 +2185,49 @@ CMD ["python", "main.py"]
 - 用户反馈（点赞/点踩率）
 
 出了问题要能及时收到告警，别等用户投诉了才发现。
+
+## 配图清单
+
+**1. 流程图：三层护栏与请求处理（Mermaid）**
+
+\`\`\`mermaid
+flowchart TD
+    A[用户输入] --> B[输入护栏<br/>注入检测/敏感信息/范围判断]
+    B -->|拦截| X[直接拒绝并提示]
+    B -->|放行| C[LLM / Agent 推理]
+    C --> D[输出护栏<br/>幻觉/安全/免责声明]
+    D --> E{是否调用工具?}
+    E -->|是| F[动作护栏<br/>权限/金额/次数/超时]
+    F --> G[执行工具]
+    G --> C
+    E -->|否| H[返回用户]
+\`\`\`
+
+**2. 架构图：生产部署拓扑**
+组件：负载均衡（Nginx）、多实例应用服务、PostgreSQL、向量数据库、Redis（缓存/限流）、LLM API、监控告警栈。调用关系：用户 → 负载均衡 → 应用实例（多副本无状态）→ 各数据存储与LLM；所有实例的指标/日志 → 监控系统（Prometheus/Grafana或Langfuse）→ 告警。绘制建议：用draw.io画分层（接入层/服务层/数据与外部依赖层/可观测层），应用层画多个相同方框表示水平扩展。
+
+**3. 界面截图占位符**
+- 【截图需求：监控大盘（Grafana/Langfuse），需标出 QPS、P95延迟、错误率、Token成本曲线和告警红线】
+- 【截图需求：限流命中时返回给用户的 429 提示界面】
+
+**4. 代码对比表：成本优化手段收益**
+
+| 手段 | 典型收益 | 实现成本 |
+|------|---------|---------|
+| 模型分级路由 | 降60-80% | 低 |
+| Prompt Caching | 重复输入降至约10% | 低 |
+| 语义缓存 | 命中请求近乎免费 | 中 |
+| 控制上下文 | 随用量线性下降 | 低 |
+| Batch API | 约5折（非实时任务） | 低 |
+
+## 参考文献
+
+1. OWASP Top 10 for LLM Applications（2025）：https://owasp.org/www-project-top-10-for-large-language-model-applications/
+2. OpenAI API 定价：https://openai.com/api/pricing/
+3. Claude API 定价：https://platform.claude.com/docs/about-claude/pricing
+4. OpenAI Prompt Caching 指南：https://platform.openai.com/docs/guides/prompt-caching
+5. OpenAI Batch API：https://platform.openai.com/docs/guides/batch
+6. LangChain 生产部署（LangGraph Platform）：https://langchain-ai.github.io/langgraph/concepts/deployment_options/
 
 ## 学完这个模块，你应该能做到
 

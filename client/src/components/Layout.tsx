@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { NavLink, Outlet, useNavigate } from 'react-router-dom';
 import { useAuth } from '../lib/auth';
 
@@ -13,10 +14,29 @@ const menu = [
 export default function Layout() {
   const { user, logout } = useAuth();
   const nav = useNavigate();
+  const [drawerOpen, setDrawerOpen] = useState(false);
+
+  const closeDrawer = () => setDrawerOpen(false);
 
   return (
     <div className="app-layout">
-      <aside className="sidebar">
+      {/* 移动端顶栏 */}
+      <div className="mobile-topbar">
+        <button className="hamburger" onClick={() => setDrawerOpen(true)} aria-label="菜单">
+          <span></span><span></span><span></span>
+        </button>
+        <div className="mobile-topbar-title">📖 智能体工程手册</div>
+        {user ? (
+          <div className="mobile-topbar-user" onClick={() => nav('/settings')}>👤</div>
+        ) : (
+          <div className="mobile-topbar-user" onClick={() => nav('/login')}>🔑</div>
+        )}
+      </div>
+
+      {/* 遮罩 */}
+      {drawerOpen && <div className="drawer-overlay" onClick={closeDrawer} />}
+
+      <aside className={`sidebar ${drawerOpen ? 'open' : ''}`}>
         <div className="sidebar-header">
           <div className="sidebar-logo">
             <div className="sidebar-icon">📖</div>
@@ -25,8 +45,9 @@ export default function Layout() {
               <div className="sidebar-subtitle">AGENTIC HANDBOOK</div>
             </div>
           </div>
+          <button className="drawer-close" onClick={closeDrawer} aria-label="关闭">✕</button>
         </div>
-        <nav className="sidebar-nav">
+        <nav className="sidebar-nav" onClick={closeDrawer}>
           {menu.map(m => (
             <NavLink key={m.to} to={m.to} end={m.end} className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}>
               <span className="nav-icon">{m.icon}</span>
@@ -48,7 +69,7 @@ export default function Layout() {
             </>
           )}
         </nav>
-        <div className="sidebar-footer">
+        <div className="sidebar-footer" onClick={closeDrawer}>
           {user && (
             <div style={{ padding: '8px 14px', fontSize: 13, color: 'var(--text-secondary)', marginBottom: 4 }}>
               👤 {user.username}

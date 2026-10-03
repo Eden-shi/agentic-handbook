@@ -9,11 +9,13 @@ export default function StageDetail() {
   const { user } = useAuth();
   const nav = useNavigate();
   const [stage, setStage] = useState<any>(null);
+  const [stages, setStages] = useState<any[]>([]);
   const [done, setDone] = useState(false);
 
   useEffect(() => {
     if (id) {
       api.get(`/stages/${id}`).then(r => setStage(r.data));
+      api.get('/stages').then(r => setStages(r.data));
       if (user) {
         api.get('/my-progress').then(r => {
           const p = r.data.find((x: any) => x.itemType === 'stage' && x.itemId === id);
@@ -29,6 +31,11 @@ export default function StageDetail() {
     await api.post('/progress', { itemType: 'stage', itemId: id, isCompleted: newVal });
     setDone(newVal);
   };
+
+  // 按stageNumber排序找下一章
+  const sorted = [...stages].sort((a, b) => a.stageNumber - b.stageNumber);
+  const idx = sorted.findIndex(s => String(s.stageNumber) === String(id));
+  const next = idx >= 0 && idx < sorted.length - 1 ? sorted[idx + 1] : null;
 
   if (!stage) return <div className="card">加载中...</div>;
 
@@ -56,11 +63,26 @@ export default function StageDetail() {
           </div>
         )}
       </div>
-      <div style={{ display: 'flex', gap: 12 }}>
-        <button className={`check-btn ${done ? 'done' : ''}`} onClick={toggle} style={{ padding: '12px 28px', fontSize: 14 }}>
-          {done ? '✓ 已完成' : '标记为已完成'}
+
+      {/* 底部操作：上一章 / 完成 / 下一章 */}
+      <div className="detail-nav">
+        {idx > 0 ? (
+          <button className="check-btn" onClick={() => nav(`/stages/${sorted[idx - 1].stageNumber}`)}>
+            ← 上一章节
+          </button>
+        ) : <span style={{ flex: 1 }} />}
+        <button className={`check-btn ${done ? 'done' : ''}`} onClick={toggle}>
+          {done ? '✓ 已完成' : '标记完成'}
         </button>
-        <button className="check-btn" onClick={() => nav('/stages')} style={{ padding: '12px 28px', fontSize: 14 }}>返回列表</button>
+        {next ? (
+          <button className="btn-next" onClick={() => nav(`/stages/${next.stageNumber}`)}>
+            下一章节：{next.title} →
+          </button>
+        ) : (
+          <button className="btn-next" onClick={() => nav('/projects')}>
+            全部学完，去做实践项目 →
+          </button>
+        )}
       </div>
     </div>
   );
